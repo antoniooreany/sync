@@ -47,7 +47,8 @@ def main():
     try:
         res = subprocess.run(
             ["gitlint", "--msg-filename", commit_msg_filepath],
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             text=True,
             encoding="utf-8"
         )
@@ -56,26 +57,50 @@ def main():
             print("====================================================", file=sys.stderr)
             
             # Read the actual commit message that failed
+            msg = "Unknown Message"
             try:
                 with open(commit_msg_filepath, "r", encoding="utf-8") as f:
                     msg = f.readline().strip()
-                print(f"  Your title: \\"{msg}\\"", file=sys.stderr)
+                print(f"  Your title: \\"{msg}\\\"", file=sys.stderr)
             except Exception:
                 pass
             print("----------------------------------------------------", file=sys.stderr)
 
-            # Format the output beautifully
+            # Generate smart suggestion
+            suggestion = "feat: add mock test file"
+            if msg != "Unknown Message":
+                msg_lower = msg.lower()
+                clean_msg = msg
+                # Clean up typical leading verbs if present to make suggestion look clean
+                for word in ["added", "add", "created", "create", "fixed", "fix", "updated", "update", "cleaned", "clean", "refactored", "refactor"]:
+                    if msg_lower.startswith(word):
+                        clean_msg = msg[len(word):].strip().strip(":")
+                        break
+
+                if any(w in msg_lower for w in ["fix", "bug", "resolve", "error", "crash"]):
+                    suggestion = f"fix: {clean_msg.lower()}"
+                elif any(w in msg_lower for w in ["test", "mock", "spec", "coverage"]):
+                    suggestion = f"test: {clean_msg.lower()}"
+                elif any(w in msg_lower for w in ["doc", "readme", "guide", "markdown"]):
+                    suggestion = f"docs: {clean_msg.lower()}"
+                elif any(w in msg_lower for w in ["refactor", "cleanup", "clean"]):
+                    suggestion = f"refactor: {clean_msg.lower()}"
+                elif any(w in msg_lower for w in ["chore", "bump", "build", "update"]):
+                    suggestion = f"chore: {clean_msg.lower()}"
+                else:
+                    suggestion = f"feat: {clean_msg.lower()}"
+
+            print("  • Error: Commit title does not follow Conventional Commits.", file=sys.stderr)
+            print("    Expected format: <type>(<scope>): <subject>", file=sys.stderr)
+            print("    Allowed types  : feat, fix, docs, refactor, test, chore", file=sys.stderr)
+            print("    Rule           : Max 72 characters, lowercase subject, no trailing dot.", file=sys.stderr)
+            print(f"    Possible Fix   : \\"{suggestion}\\\"", file=sys.stderr)
+            print("----------------------------------------------------", file=sys.stderr)
+
+            # Format gitlint output details
             lines = res.stdout.strip().splitlines()
             for line in lines:
-                if "Title does not match regex" in line or "T7" in line:
-                    print("  • Error: Commit title does not follow Conventional Commits.", file=sys.stderr)
-                    print("    Expected format: <type>(<scope>): <subject>", file=sys.stderr)
-                    print("    Allowed types  : feat, fix, docs, refactor, test, chore", file=sys.stderr)
-                    print("    Example        : feat(ui): add search input", file=sys.stderr)
-                elif "title-max-length" in line or "T1" in line:
-                    print("  • Error: Title is too long (exceeds 72 characters).", file=sys.stderr)
-                else:
-                    print(f"  • {line}", file=sys.stderr)
+                print(f"  [Detail] {line}", file=sys.stderr)
             print("====================================================\\n", file=sys.stderr)
             sys.exit(res.returncode)
     except FileNotFoundError:
