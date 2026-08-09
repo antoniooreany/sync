@@ -31,8 +31,10 @@ def main():
             sys.exit(2)
 
         # 2. Extract configuration
-        interval = "weekly"
-        if args.monthly:
+        interval = "daily"
+        if args.weekly:
+            interval = "weekly"
+        elif args.monthly:
             interval = "monthly"
 
         # 3. Detect assignee (using gh CLI)

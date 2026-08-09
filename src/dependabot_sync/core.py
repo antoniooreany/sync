@@ -36,7 +36,7 @@ def get_github_user() -> Optional[str]:
     except Exception:
         return None
 
-def generate_dependabot_config(interval: str = "weekly", limit: int = 3, assignee: Optional[str] = None) -> str:
+def generate_dependabot_config(interval: str = "daily", limit: int = 3, assignee: Optional[str] = None) -> str:
     """Generate a standard, low-noise dependabot.yml configuration string."""
     assignee_block = ""
     if assignee:
