@@ -22,17 +22,18 @@ def render_pr_body(diff: str, commits: list, base: str = "develop", head: str = 
 
     
     if smart_summary:
-        body_content = f"""{smart_summary}
-
-## Raw Changes
-{changes_str}
-
-## Inferred Labels
-- {inferred_labels}
-
-## Notes
-_Last updated by pr-sync (Smart Mode) at {timestamp}._"""
-        return body_content
+        # Build full PR body with smart summary and required sections
+        sections = []
+        sections.append(f"## Smart Summary\n{smart_summary}\n")
+        sections.append(f"## Summary\n\nIntroduce changes from branch {head} into {base}.\n")
+        sections.append(f"## Changes\n\n{changes_str}\n")
+        sections.append(f"## Commits\n\n{commits_str}\n")
+        sections.append(f"## Inferred Labels\n\n- {inferred_labels}\n")
+        sections.append("## Risks\n\n- Low: see commit history for scope of change.\n")
+        sections.append("## Config\n\n- No new required environment variables beyond existing ones.\n")
+        sections.append("## Testing\n\n- ruff check, pytest, manual smoke test.\n")
+        sections.append(f"## Notes\n\n-\n\n_Last updated by pr-sync (Smart Mode) at {timestamp}._")
+        return "\n".join(sections)
     
     # Context for rendering (fallback)
     context = {
