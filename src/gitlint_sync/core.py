@@ -97,6 +97,26 @@ def main():
             print(f"    Possible Fix   : \\"{suggestion}\\\"", file=sys.stderr)
             print("----------------------------------------------------", file=sys.stderr)
 
+            # Ask user if they want to auto-rewrite
+            try:
+                # Use standard input to prompt the user
+                # We need to explicitly open /dev/tty on Unix or CON on Windows if stdin is redirected by Git
+                # In standard git hooks, stdin is redirected. So we read from terminal directly
+                import os
+                import sys
+                tty_path = "CON" if os.name == "nt" else "/dev/tty"
+                with open(tty_path, "r") as tty_in:
+                    print("❓ Would you like to automatically rewrite the message to this suggestion? [Y/n] ", end="", file=sys.stderr, flush=True)
+                    ans = tty_in.readline().strip().lower()
+                if ans in ["", "y", "yes"]:
+                    with open(commit_msg_filepath, "w", encoding="utf-8") as f:
+                        f.write(suggestion + "\\n")
+                    print("✓ Automatically rewrote commit message to: \\"{suggestion}\\"", file=sys.stderr)
+                    sys.exit(0)
+            except Exception:
+                # Fallback if tty is not available (e.g. inside IDE or non-interactive shell)
+                pass
+
             # Format gitlint output details
             lines = res.stdout.strip().splitlines()
             for line in lines:
