@@ -1,6 +1,6 @@
 # Repository Automation Toolkit: Usage Guide
 
-This guide describes how to use the automation tools (`dp`, `gl`, `pr`, and `rl`) together to manage repository health, enforce commit formatting, generate pull requests, and automate version releases.
+This guide describes how to use the automation tools (`dp`, `glnt`, `pr`, and `rl`) together to manage repository health, enforce commit formatting, generate pull requests, and automate version releases.
 
 ---
 
@@ -11,11 +11,11 @@ To configure Dependabot, Commitlint, local commit hooks, and CI workflows in a s
   ```bash
   dp init
   ```
-  * *What it does*: Generates a low-noise `.github/dependabot.yml` (weekly checks, max 3 PRs).
+  * *What it does*: Generates a low-noise `.github/dependabot.yml` (daily checks, max 3 PRs).
 
 * **Configure Commit Linting**:
   ```bash
-  gl init
+  glnt init
   ```
   * *What it does*: Generates `.gitlint` rules, sets up the local `.git/hooks/commit-msg` python validator, and adds the `.github/workflows/commit-lint.yml` GitHub Actions pipeline.
 
