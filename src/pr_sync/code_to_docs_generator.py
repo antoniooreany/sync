@@ -2,7 +2,6 @@ import os
 import sys
 import subprocess
 from pathlib import Path
-from typing import list
 from pr_sync.llm_engine import generate_smart_pr_summary
 
 def run_git(args: list[str]) -> str:
