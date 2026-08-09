@@ -1,11 +1,11 @@
 import sys
 import argparse
 import time
-from toolkit.git_api import get_current_branch, get_diff, get_commits, get_changed_files
-from toolkit.gh_api import check_auth, find_open_pr, create_pr, update_pr, add_labels
-from toolkit.pr_body import render_pr_body
-from toolkit.invariants import check_no_empty_diff_action
-from toolkit.docs_generator import infer_type_label, infer_area_labels
+from pr_sync.git_api import get_current_branch, get_diff, get_commits, get_changed_files
+from pr_sync.gh_api import check_auth, find_open_pr, create_pr, update_pr, add_labels
+from pr_sync.pr_body import render_pr_body
+from pr_sync.invariants import check_no_empty_diff_action
+from pr_sync.docs_generator import infer_type_label, infer_area_labels
 
 def main():
     try:

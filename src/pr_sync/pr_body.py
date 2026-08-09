@@ -1,7 +1,7 @@
 import datetime
 from pathlib import Path
-from toolkit.docs_generator import infer_type_label, infer_area_labels
-from toolkit.llm_engine import generate_smart_pr_summary
+from pr_sync.docs_generator import infer_type_label, infer_area_labels
+from pr_sync.llm_engine import generate_smart_pr_summary
 
 def render_pr_body(diff: str, commits: list, base: str = "develop", head: str = "HEAD", changed_files: list = None, custom_model: str = None) -> str:
     """Render the PR body using a local template or falling back to the default."""
