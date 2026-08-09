@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+.specify/feature.json
+
+# Ignore independent subprojects folders
+pr-sync/
+dependabot-sync/
+gitlint-sync/
+release-sync/
+version-sync/
+snc/
