@@ -28,21 +28,44 @@ def main():
             sys.exit(2)
 
         # 2. Write configs
+        target_dir = Path.cwd()
+        gitlint_file = target_dir / ".gitlint"
+        hook_file = target_dir / ".git" / "hooks" / "commit-msg"
+        workflow_file = target_dir / ".github" / "workflows" / "commit-lint.yml"
+
+        existing = []
+        if gitlint_file.exists():
+            existing.append(".gitlint")
+        if hook_file.exists():
+            existing.append(".git/hooks/commit-msg")
+        if workflow_file.exists():
+            existing.append(".github/workflows/commit-lint.yml")
+
+        force_write = args.force
+        if existing and not force_write:
+            try:
+                print(f"⚠️  Configuration files already exist: {', '.join(existing)}")
+                ans = input("Overwrite all? [y/N]: ").strip().lower()
+                if ans in ["y", "yes"]:
+                    force_write = True
+                else:
+                    print("Skipped.")
+                    sys.exit(0)
+            except KeyboardInterrupt:
+                print("\nAborted.")
+                sys.exit(1)
+
         try:
-            written_files = write_configs(Path.cwd(), force=args.force)
+            written_files = write_configs(target_dir, force=force_write)
             print("🎉 Successfully initialized Gitlint configurations:")
             for f in written_files:
-                # If path is under current dir, show relative, otherwise full
                 try:
-                    rel = f.relative_to(Path.cwd())
+                    rel = f.relative_to(target_dir)
                     print(f"  • {rel}")
                 except ValueError:
                     print(f"  • {f}")
             print("💡 Pro-Tip: Make sure you run 'pip install gitlint' globally to enable local commit hook!")
             sys.exit(0)
-        except FileExistsError as e:
-            print(f"❌ Error: {e}", file=sys.stderr)
-            sys.exit(1)
         except Exception as e:
             print(f"💥 Error: {e}", file=sys.stderr)
             sys.exit(3)

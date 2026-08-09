@@ -45,14 +45,25 @@ def main():
             print("ℹ️  No authenticated GitHub user found (assignees block skipped)")
 
         # 4. Generate & write
+        config_file = Path.cwd() / ".github" / "dependabot.yml"
+        force_write = args.force
+        if config_file.exists() and not force_write:
+            try:
+                ans = input("⚠️  Dependabot configuration already exists. Overwrite? [y/N]: ").strip().lower()
+                if ans in ["y", "yes"]:
+                    force_write = True
+                else:
+                    print("Skipped.")
+                    sys.exit(0)
+            except KeyboardInterrupt:
+                print("\nAborted.")
+                sys.exit(1)
+
         try:
             config_content = generate_dependabot_config(interval, args.limit, assignee)
-            written_path = write_config(Path.cwd(), config_content, force=args.force)
+            written_path = write_config(Path.cwd(), config_content, force=force_write)
             print(f"🎉 Successfully initialized Dependabot configuration at: {written_path}")
             sys.exit(0)
-        except FileExistsError as e:
-            print(f"❌ Error: {e}", file=sys.stderr)
-            sys.exit(1)
         except Exception as e:
             print(f"💥 Error: {e}", file=sys.stderr)
             sys.exit(3)
