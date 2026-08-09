@@ -36,8 +36,8 @@ def _get_best_gemini_model(api_key: str) -> str:
         
     return "models/gemini-2.0-flash"
 
-def generate_smart_pr_summary(diff: str, commits: list[str], custom_model: Optional[str] = None) -> Optional[str]:
-    """Uses LLM API to generate a smart summary and risk analysis."""
+def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Optional[str]:
+    """Sends a generic prompt to the configured LLM API (Ollama, Anthropic, or Gemini)."""
     ollama_model_raw = custom_model if custom_model else os.environ.get("OLLAMA_MODEL")
     ollama_model = ollama_model_raw.strip() if ollama_model_raw else None
     anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -46,25 +46,6 @@ def generate_smart_pr_summary(diff: str, commits: list[str], custom_model: Optio
     if not ollama_model and not anthropic_key and not gemini_key:
         print("No OLLAMA_MODEL, ANTHROPIC_API_KEY, or GEMINI_API_KEY found.")
         return None
-
-    prompt = f"""You are an expert software engineer reviewing a pull request.
-Based on the following commits and git diff, generate a concise and meaningful PR description.
-Do NOT just list the commits. Group the changes logically into features, bug fixes, and chores.
-Analyze the risks based on the files changed.
-
-Commits:
-{chr(10).join(commits)}
-
-Diff:
-{diff[:4000]}
-
-Respond with ONLY the markdown content for these two sections:
-## Smart Summary
-<your logical grouping of changes>
-
-## Risk Analysis
-<your assessment of risks>
-"""
 
     if ollama_model:
         print(f" ⚙️  Using local Ollama API (Model: {ollama_model})...")
@@ -138,6 +119,28 @@ Respond with ONLY the markdown content for these two sections:
             return None
             
     return None
+
+def generate_smart_pr_summary(diff: str, commits: list[str], custom_model: Optional[str] = None) -> Optional[str]:
+    """Uses LLM API to generate a smart summary and risk analysis."""
+    prompt = f"""You are an expert software engineer reviewing a pull request.
+Based on the following commits and git diff, generate a concise and meaningful PR description.
+Do NOT just list the commits. Group the changes logically into features, bug fixes, and chores.
+Analyze the risks based on the files changed.
+
+Commits:
+{chr(10).join(commits)}
+
+Diff:
+{diff[:4000]}
+
+Respond with ONLY the markdown content for these two sections:
+## Smart Summary
+<your logical grouping of changes>
+
+## Risk Analysis
+<your assessment of risks>
+"""
+    return generate_llm_content(prompt, custom_model=custom_model)
 
 
 

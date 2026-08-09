@@ -47,6 +47,11 @@ def main():
         changed_files = get_changed_files(base, head)
         print(f"    • Found {len(commits)} commits and {len(changed_files)} changed files")
 
+        # Step 2.5: Code-to-Docs generation
+        print("📝 [2.5/4] Generating code reference documentation...")
+        from pr_sync.code_to_docs_generator import run_code_to_docs
+        run_code_to_docs(changed_files, custom_model=args.model)
+
         # Step 3: LLM generation
         print("🧠 [3/4] Generating PR body content...")
         body = render_pr_body(diff, commits, base=base, head=head, changed_files=changed_files, custom_model=args.model)
