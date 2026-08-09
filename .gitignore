@@ -6,10 +6,10 @@ __pycache__/
 venv/
 .specify/feature.json
 
-# Ignore independent subprojects folders
-pr-sync/
-dependabot-sync/
-gitlint-sync/
-release-sync/
-version-sync/
-snc/
+# Ignore independent subprojects folders (legacy, now consolidated into src/)
+/pr-sync/
+/dependabot-sync/
+/gitlint-sync/
+/release-sync/
+/version-sync/
+/snc/

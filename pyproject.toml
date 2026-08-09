@@ -1,7 +1,7 @@
 [project]
 name = "sync"
 version = "0.3.0"
-description = "Monorepo for developer automation: pr, rl, dp, glint"
+description = "Monorepo for developer automation: pr, rl, dp, glnt, cm"
 authors = [
     {name = "antoniooreany"}
 ]
@@ -12,14 +12,18 @@ dependencies = [
 ]
 
 [project.scripts]
-pr = "pr_sync.cli:main"
-rl = "release_sync.cli:main"
-dp = "dependabot_sync.cli:main"
-gl = "gitlint_sync.cli:main"
+pr   = "pr_sync.cli:main"
+rl   = "release_sync.cli:main"
+dp   = "dependabot_sync.cli:main"
+glnt = "gitlint_sync.cli:main"
+cm   = "gitlint_sync.commit_generator:main"
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
