@@ -15,7 +15,7 @@ dependencies = [
 pr = "pr_sync.cli:main"
 rl = "release_sync.cli:main"
 dp = "dependabot_sync.cli:main"
-glint = "gitlint_sync.cli:main"
+gl = "gitlint_sync.cli:main"
 
 [build-system]
 requires = ["setuptools>=42", "wheel"]
