@@ -1,106 +1,62 @@
-# PR Sync CLI Documentation
+# Release Sync CLI (rl)
 
-## Module Description
+## Purpose and Design
 
-`cli.py` is a command-line interface (CLI) tool designed to automate the process of creating and updating pull requests (PRs) on GitHub based on changes in a Git repository. It integrates with both local Git operations and GitHub's REST API to fetch repository data, analyze changes, generate PR content, and apply appropriate labels.
+The `release_sync` command-line interface is designed to automate the process of releasing software projects by integrating GitHub and Git functionalities. This tool helps in automating versioning, tracking changes, and creating detailed release notes.
 
-## Class and Function Reference
+### Class and Function Reference
 
-### Main Function: `main()`
+#### Main Script (`main.py`)
+- **Description**: The main entry point for the `release_sync` CLI. It parses command-line arguments, validates environment conditions, and orchestrates the release process.
+- **Parameters**:
+  - `version`: Optional, the semantic version of the target release (e.g., `0.3.0`) or a bump level (`major`, `minor`, `patch`).
+  - `from_ref`: Exclusive starting git reference for the range of commits to include in the release.
+  - `to_ref`: Inclusive ending git reference for the range of commits to include in the release.
+  - `dry-run`: Optional, whether to perform a dry run without writing files or creating GitHub releases.
+  - `force`: Optional, whether to allow version downgrade.
+  - `changelog`: Path to the CHANGELOG file. Default: `CHANGELOG.md`.
+- **Return Type**: None
+- **Exceptions Raised**:
+  - `ValueError` if the version specified does not match a known semantic version or bump level.
+  - `RuntimeError` for environmental issues (not inside a valid Git repository or GitHub CLI authentication).
 
-**Purpose:** The primary function that orchestrates the entire PR sync process.
-
-**Parameters:**
-- None
-
-**Return Type:**
-- Integer: Exit code (0 for success, non-zero for failure).
-
-**Exceptions Raised:**
-- Any exception encountered during execution will be caught and printed to `stderr`.
-
-**Example Usage:**
-```python
-# Running the CLI script from the command line
-python cli.py --base develop
-```
-
-### Helper Functions
-
-#### `check_auth()`
-- **Purpose:** Verifies if GitHub CLI is authenticated.
-- **Parameters:** None
-- **Return Type:** Boolean: True if authenticated, False otherwise.
-
-#### `get_current_branch()`
-- **Purpose:** Fetches the current Git branch.
-- **Parameters:** None
-- **Return Type:** String: Name of the current branch.
-
-#### `get_diff(base, head)`
-- **Purpose:** Retrieves the difference between two branches (base and head).
-- **Parameters:**
-  - `base` (String): Base branch name.
-  - `head` (String): Head branch name.
-- **Return Type:** String: The diff output.
-
-#### `get_commits(base, head)`
-- **Purpose:** Fetches the commits between two branches.
-- **Parameters:**
-  - `base` (String): Base branch name.
-  - `head` (String): Head branch name.
-- **Return Type:** List of dictionaries: Each dictionary represents a commit.
-
-#### `get_changed_files(base, head)`
-- **Purpose:** Lists files that have changed between two branches.
-- **Parameters:**
-  - `base` (String): Base branch name.
-  - `head` (String): Head branch name.
-- **Return Type:** List of strings: Each string is a file path.
-
-#### `check_no_empty_diff_action(diff)`
-- **Purpose:** Checks if there are any non-empty diff actions in the provided diff.
-- **Parameters:**
-  - `diff` (String): Diff output.
-  - `skip_check` (Boolean, optional): If True, skips the check.
-- **Return Type:** Boolean: True if no changes, False otherwise.
-
-#### `render_pr_body(diff, commits, base, head, changed_files, custom_model)`
-- **Purpose:** Generates the PR body content based on the provided diff and commit information.
-- **Parameters:**
-  - `diff` (String): Diff output.
-  - `commits` (List of dictionaries): Commit data.
-  - `base` (String): Base branch name.
-  - `head` (String): Head branch name.
-  - `changed_files` (List of strings): Changed file paths.
-  - `custom_model` (String, optional): Custom model for PR body generation.
-- **Return Type:** String: PR body content.
-
-#### `infer_type_label(changed_files)`
-- **Purpose:** Infers the type label based on changed files.
-- **Parameters:**
-  - `changed_files` (List of strings): Changed file paths.
-- **Return Type:** String: Inferred type label.
-
-#### `infer_area_labels(changed_files)`
-- **Purpose:** Infers area labels based on changed files.
-- **Parameters:**
-  - `changed_files` (List of strings): Changed file paths.
-- **Return Type:** List of strings: Inferred area labels.
+#### Core Functions (`core.py`)
+- **get_latest_tag()**: Retrieves the latest tag in the Git repository.
+- **verify_not_exist(target_version)**: Checks if a specified semantic version tag already exists in the Git repository.
+- **get_commits_between(from_ref, to_ref)**: Fetches commits between two git references (exclusive starting and inclusive ending).
+- **fetch_merged_prs()**: Retrieves all merged pull requests from GitHub within the specified commit range.
+- **compile_release_notes(matched_prs)**: Compiles detailed release notes based on the matched PRs and their associated commits.
+- **prepend_to_changelog(changelog_path, target_version, notes)**: Prepends the generated release notes to the CHANGELOG file.
+- **create_git_tag(target_version)**: Creates a new git tag with the specified semantic version.
+- **push_git_tag(target_version)**: Pushes the newly created git tag to the remote repository.
+- **create_github_release(target_version, notes)**: Creates a GitHub release using the specified semantic version and release notes.
+- **commit_and_push_release(target_version, changelog_path)**: Commits and pushes all changes related to the release (CHANGELOG and version configs).
+- **sync_version_across_repo(project_root, target_version, force=args.force)**: Syncs the version across different project directories with the specified semantic version and optional force flag.
 
 ## Practical Usage Examples
 
-### Basic PR Sync
-```bash
-python cli.py --base develop
-```
-This command will synchronize a pull request from the current branch to the `develop` branch.
+1. **Automatic Version Bumping**:
+   ```sh
+   rl --version patch
+   ```
+   This command will check the current version, auto-detect a bump level (patch by default), and sync the version across all project directories if necessary.
 
-### Custom Model for PR Body
-```bash
-python cli.py --base develop --model custom-model-name
-```
-This command will use a custom model named "custom-model-name" for generating the PR body content.
+2. **Custom Version Specification**:
+   ```sh
+   rl --version 0.3.5 --from v0.3.0 --to HEAD
+   ```
+   This command will use the specified semantic version (`0.3.5`) and a custom range of commits (`v0.3.0` to `HEAD`) to generate release notes, sync the version across all project directories, and create a GitHub release.
 
-### Example of Error Handling
-If any step fails, an error message will be printed to `stderr` and the script will return a non-zero exit code.
+3. **Dry Run**:
+   ```sh
+   rl --version 1.2.3 --dry-run
+   ```
+   This command will simulate the entire release process without writing files or creating GitHub releases, allowing you to preview changes before they are applied.
+
+4. **Force Version Downgrade**:
+   ```sh
+   rl --version 0.5.6 --force
+   ```
+   This command will allow version downgrade if specified, ensuring that `0.5.6` is used as the target release even if it does not match a known semantic version or bump level.
+
+By following these steps and using the provided examples, you can automate the release process for your software projects with ease using the `release_sync` CLI.

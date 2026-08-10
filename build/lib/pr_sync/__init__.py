@@ -2,4 +2,4 @@
 Automation Toolkit - A family of small, focused automation tools.
 """
 
-__version__ = "0.4.1"
+__version__ = "0.1.0"

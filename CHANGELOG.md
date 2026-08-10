@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.4.1 — 2026-08-11
+
+### Internal
+- [#4] Auto PR: feature/gitflow-tool (by @antoniooreany)
+
+## v0.4.0 — 2026-08-11
+
+### Internal
+- [#4] Auto PR: feature/gitflow-tool (by @antoniooreany)
+
 ## v0.3.3 — 2026-08-10
 
 ### Internal
