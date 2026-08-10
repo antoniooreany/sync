@@ -39,8 +39,8 @@ def _get_best_gemini_model(api_key: str) -> str:
 def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Optional[str]:
     """Sends a generic prompt to the local Ollama LLM API (always enforces local models)."""
     ollama_model_raw = custom_model if custom_model else os.environ.get("OLLAMA_MODEL")
-    # Enforce local Ollama: default to "llama3" if no model specified
-    ollama_model = ollama_model_raw.strip() if ollama_model_raw else "llama3"
+    # Enforce local Ollama: default to "qwen2.5-coder:7b" for optimal code analysis speed/quality
+    ollama_model = ollama_model_raw.strip() if ollama_model_raw else "qwen2.5-coder:7b"
     
     print(f" ⚙️  Using local Ollama API (Model: {ollama_model})...")
     url = "http://127.0.0.1:11434/api/generate"
