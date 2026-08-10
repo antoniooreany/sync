@@ -64,7 +64,7 @@ class TestGitflowSync(unittest.TestCase):
     @patch("gitflow_sync.core.get_current_branch", return_value="release/1.0.0")
     @patch("gitflow_sync.core.list_local_branches", return_value=["main", "develop", "release/1.0.0"])
     @patch("gitflow_sync.core.run_git", return_value="")
-    @patch("version_sync.core.sync_version_across_repo")
+    @patch("release_sync.core.sync_version_across_repo")
     def test_finish_release_branch(self, mock_sync, mock_run, mock_list, mock_curr, mock_repo):
         from gitflow_sync.core import finish_current_branch
         finish_current_branch(dry_run=False)

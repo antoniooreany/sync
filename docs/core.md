@@ -1,109 +1,94 @@
-# Core Module Documentation
+## Module Description
 
-## Purpose and Design
+The `gitflow_sync` module provides a set of functions to interact with Git repositories following the Gitflow branching model. It includes functionalities to check repository compliance, start new branches, and finish branches according to Gitflow rules.
 
-The `core.py` module is designed to automate the setup of Gitlint-related configurations within a git repository. It provides functions to check if the current directory is a git root, generate standard Gitlint configuration files, create a cross-platform Python-based commit-msg hook script, and set up a GitHub Actions workflow for linting commits.
+### Purpose
+To automate and ensure adherence to Gitflow practices within a Python project, making it easier for developers to manage feature branches, bug fixes, hotfixes, releases, and more following the well-established Gitflow workflow.
 
-The design ensures that each function performs a specific task while maintaining a clean separation of concerns and error handling. The module uses subprocesses to interact with Git commands and pathlib for file path manipulation, ensuring compatibility across different platforms.
+### Design
+The module is designed as a collection of utility functions that interact with Git using subprocess calls. It checks repository state, validates branch names, and performs operations like creating, merging, and tagging branches to ensure compliance with Gitflow standards.
 
 ## Class and Function Reference
 
-### is_git_root()
-
-**Purpose:**
-Check if the current working directory is a git repository root.
-
-**Parameters:** None
-
-**Return Type:** bool
-
-**Exceptions Raised:**
-- `subprocess.CalledProcessError`: If any Git command fails.
-- `FileNotFoundError`: If the `.git` directory does not exist in the current directory.
-
-### generate_gitlint_config()
-
-**Purpose:**
-Generate the standard .gitlint configuration string.
-
-**Parameters:** None
-
-**Return Type:** str
-
-**Exceptions Raised:** None
-
-### generate_commit_msg_hook()
-
-**Purpose:**
-Generate a cross-platform Python-based commit-msg hook script.
-
-**Parameters:** None
-
-**Return Type:** str
-
-**Exceptions Raised:** None
-
-### generate_workflow_config()
-
-**Purpose:**
-Generate the GitHub Actions commit-lint.yml workflow string.
-
-**Parameters:** None
-
-**Return Type:** str
-
-**Exceptions Raised:** None
-
-### write_configs(target_dir: Path, force: bool = False) -> list[Path]
-
-**Purpose:**
-Write all gitlint-related configuration files with safety checks.
-
+### `run_git(args: list[str]) -> str`
+**Purpose:** Execute a git command and return its standard output.
 **Parameters:**
-- `target_dir` (Path): The target directory where the configuration files should be written.
-- `force` (bool, optional): If True, overwrite existing configuration files without asking. Default is False.
+- `args`: List of string arguments representing the git command to execute.
+**Return Type:** String containing the standard output of the executed git command.
+**Exceptions Raised:** Raises `subprocess.CalledProcessError` if the git command fails, or `FileNotFoundError` if 'git' is not found.
 
-**Return Type:** list[Path]
+### `is_git_repo() -> bool`
+**Purpose:** Check if the current directory is inside a valid Git repository.
+**Return Type:** Boolean indicating whether the current directory is a Git repository.
+**Exceptions Raised:** No exceptions raised.
 
-**Exceptions Raised:**
-- `FileNotFoundError`: If the `.git` directory does not exist in the target directory.
-- `FileExistsError`: If any of the configuration files already exist and `force` is False.
+### `get_current_branch() -> str`
+**Purpose:** Retrieve the name of the currently active branch in the repository.
+**Return Type:** String containing the name of the current branch.
+**Exceptions Raised:** Raises `subprocess.CalledProcessError` if the git command fails, or `FileNotFoundError` if 'git' is not found.
+
+### `list_local_branches() -> list[str]`
+**Purpose:** Get a list of all local branches in the repository.
+**Return Type:** List of strings containing names of all local branches.
+**Exceptions Raised:** Raises `subprocess.CalledProcessError` if the git command fails, or `FileNotFoundError` if 'git' is not found.
+
+### `get_base_branches(branches: list[str]) -> dict[str, str]`
+**Purpose:** Identify and return a dictionary mapping of standard base branches (main/master, develop).
+**Parameters:**
+- `branches`: List of strings representing all branch names in the repository.
+**Return Type:** Dictionary with keys "production" and/or "development", corresponding to the identified base branches.
+
+### `validate_branch_name(name: str) -> bool`
+**Purpose:** Check if a branch name adheres to Gitflow standards.
+**Parameters:**
+- `name`: String representing the branch name to validate.
+**Return Type:** Boolean indicating whether the branch name is compliant with Gitflow standards.
+
+### `check_gitflow_compliance() -> dict`
+**Purpose:** Assess current repository compliance with Gitflow and return a detailed report.
+**Return Type:** Dictionary containing details about the current branch, base branches, warnings, non-compliant branches, and overall compliance status.
+**Exceptions Raised:** Raises `FileNotFoundError` if the directory is not a git repository.
+
+### `start_branch(branch_type: str, name: str) -> str`
+**Purpose:** Start a new branch of a given type from the correct base branch following Gitflow rules.
+**Parameters:**
+- `branch_type`: String representing the type of branch to create (e.g., "feature", "hotfix").
+- `name`: String representing the desired name for the new branch.
+**Return Type:** String containing the full name of the newly created branch.
+**Exceptions Raised:** Raises `FileNotFoundError` if not in a git repository, `ValueError` if the branch type is invalid.
+
+### `finish_current_branch(dry_run: bool = False, force: bool = False) -> None`
+**Purpose:** Finish the current Gitflow branch with version and release synchronization following Gitflow rules.
+**Parameters:**
+- `dry_run`: Optional boolean indicating whether to perform a dry run (default is `False`).
+- `force`: Optional boolean indicating whether to force version sync even if there are uncommitted changes (default is `False`).
+**Return Type:** None
+**Exceptions Raised:** Raises `FileNotFoundError` if not in a git repository, `ValueError` if the current branch is a base branch.
 
 ## Practical Usage Examples
 
-### Example 1: Check if Current Directory is a Git Root
-
+### Checking Repository Compliance
 ```python
-from core import is_git_root
+from gitflow_sync import check_gitflow_compliance
 
-if is_git_root():
-    print("This is a git repository root.")
-else:
-    print("This is not a git repository root.")
+compliance_report = check_gitflow_compliance()
+print(compliance_report)
 ```
 
-### Example 2: Generate and Write Configuration Files
-
+### Starting a Feature Branch
 ```python
-from pathlib import Path
-from core import write_configs
+from gitflow_sync import start_branch
 
-target_directory = Path("/path/to/your/git/repo")
-config_files_written = write_configs(target_directory)
-
-print(f"Configuration files written to: {', '.join(str(file) for file in config_files_written)}")
+new_feature_branch = start_branch("feature", "new-feature-branch")
+print(f"New feature branch created: {new_feature_branch}")
 ```
 
-### Example 3: Overwrite Existing Configuration Files
-
+### Finishing a Release Branch
 ```python
-from pathlib import Path
-from core import write_configs
+from gitflow_sync import finish_current_branch
 
-target_directory = Path("/path/to/your/git/repo")
-config_files_written = write_configs(target_directory, force=True)
-
-print(f"Configuration files overwritten and written to: {', '.join(str(file) for file in config_files_written)}")
+finish_current_branch(force=True)
+print("Release branch finished successfully.")
 ```
 
-These examples demonstrate how to use the functions provided by `core.py` to check if a directory is a git root, generate configuration files, and handle existing configurations with or without force mode.
+These examples demonstrate how to use the functions provided by the `gitflow_sync` module to ensure Gitflow compliance and manage branches in your project effectively.

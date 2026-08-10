@@ -171,7 +171,7 @@ def finish_current_branch(dry_run: bool = False, force: bool = False) -> None:
             return
 
         # 1. Sync versions across the repository
-        from version_sync.core import sync_version_across_repo
+        from release_sync.core import sync_version_across_repo
         print(f"📈 Synchronizing version to {version_tag}...")
         sync_version_across_repo(project_root, version_tag, force=force)
 
