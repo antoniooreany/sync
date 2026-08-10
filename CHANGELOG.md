@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.3 — 2026-08-10
+
+### Internal
+- [#3] fix(llm): change default Ollama fallback model to qwen2.5-coder:7b (by @antoniooreany)
+
 ## v0.3.2 — 2026-08-10
 
 ### Internal
