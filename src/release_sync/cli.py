@@ -117,12 +117,20 @@ def main():
             if merge_hash and merge_hash in commit_set:
                 matched_prs.append(pr)
 
-    if not matched_prs:
-        print(f"❌ Error: No merged PRs found in the commit range {from_ref or 'beginning'}..{args.to_ref}.", file=sys.stderr)
-        sys.exit(EXIT_CODE_EXPECTED_ERROR)
-
     # 6. Compile release notes
-    notes = compile_release_notes(matched_prs)
+    if matched_prs:
+        notes = compile_release_notes(matched_prs)
+    else:
+        print("ℹ️  No merged PRs matched the commit range. Falling back to git log for release notes.")
+        # Fallback: compile notes from raw git logs
+        fallback_notes = []
+        for c_hash in commits:
+            try:
+                c_subject = run_git_command(["show", "-s", "--format=%s", c_hash])
+                fallback_notes.append(f"- {c_subject} ({c_hash[:7]})")
+            except Exception:
+                pass
+        notes = "### Changes\n" + "\n".join(fallback_notes) if fallback_notes else "### Changes\n- Initial release / minor changes"
     
     # 7. Execute Actions or Dry-Run
     if args.dry_run:
