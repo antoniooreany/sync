@@ -58,18 +58,28 @@ def get_commits_between(start_ref: Optional[str], end_ref: str) -> list[str]:
     return [line.strip() for line in out.splitlines() if line.strip()]
 
 def fetch_merged_prs(limit: int = DEFAULT_PR_LIMIT) -> list[dict]:
-    """Fetch merged Pull Requests using GitHub CLI."""
-    out = run_gh_command([
-        "pr", "list", 
-        "--state", "merged", 
-        "--limit", str(limit), 
-        "--json", "number,title,body,labels,mergeCommit,author"
-    ])
-    if not out:
-        return []
+    """Fetch merged Pull Requests using GitHub CLI, gracefully returning empty if no remote is configured."""
     try:
+        # Check if remote origin exists first to avoid gh CLI throwing an error in repos without remote
+        remotes = run_git_command(["remote"])
+        if not remotes:
+            print("⚠️  No git remotes configured. Skipping GitHub PR fetch.")
+            return []
+    except Exception:
+        return []
+
+    try:
+        out = run_gh_command([
+            "pr", "list", 
+            "--state", "merged", 
+            "--limit", str(limit), 
+            "--json", "number,title,body,labels,mergeCommit,author"
+        ])
+        if not out:
+            return []
         return json.loads(out)
-    except json.JSONDecodeError:
+    except Exception as e:
+        print(f"⚠️  Failed to fetch PRs via GitHub CLI (is gh auth configured?). Error: {e}")
         return []
 
 def resolve_author(pr: dict) -> str:
@@ -152,7 +162,7 @@ def get_current_branch() -> str:
     return run_git_command(["branch", "--show-current"])
 
 def commit_and_push_release(version: str, changelog_path: Path) -> None:
-    """Stage modified files, commit the release, and push to origin."""
+    """Stage modified files, commit the release, and push to origin if configured."""
     # Stage changelog
     run_git_command(["add", str(changelog_path)])
 
@@ -169,28 +179,49 @@ def commit_and_push_release(version: str, changelog_path: Path) -> None:
     commit_msg = f"chore(release): release v{version}"
     run_git_command(["commit", "-m", commit_msg])
 
-    # Push commit
-    branch = get_current_branch()
-    if branch:
-        print(f"⬆️  Pushing release commit to branch: {branch}...")
-        run_git_command(["push", "origin", branch])
+    # Push commit if origin exists
+    try:
+        remotes = run_git_command(["remote"])
+        if "origin" in remotes.split():
+            branch = get_current_branch()
+            if branch:
+                print(f"⬆️  Pushing release commit to branch: {branch}...")
+                run_git_command(["push", "origin", branch])
+        else:
+            print("⚠️  No 'origin' remote configured. Skipping release push.")
+    except Exception as e:
+        print(f"⚠️  Failed to push release commit: {e}")
 
 def create_git_tag(version: str) -> None:
     """Create a local git tag for the release at HEAD."""
     run_git_command(["tag", f"v{version}", "HEAD"])
 
 def push_git_tag(version: str) -> None:
-    """Push the tag to the remote origin."""
-    run_git_command(["push", "origin", f"v{version}"])
+    """Push the tag to the remote origin if configured."""
+    try:
+        remotes = run_git_command(["remote"])
+        if "origin" in remotes.split():
+            run_git_command(["push", "origin", f"v{version}"])
+        else:
+            print("⚠️  No 'origin' remote configured. Skipping tag push.")
+    except Exception as e:
+        print(f"⚠️  Failed to push git tag: {e}")
 
 def create_github_release(version: str, notes: str) -> None:
-    """Create a GitHub release using gh CLI."""
-    tag_name = f"v{version}"
-    run_gh_command([
-        "release", "create", tag_name,
-        "--title", tag_name,
-        "--notes", notes
-    ])
+    """Create a GitHub release using gh CLI if remote is configured."""
+    try:
+        remotes = run_git_command(["remote"])
+        if not remotes:
+            print("⚠️  No remotes configured. Skipping GitHub Release creation.")
+            return
+        tag_name = f"v{version}"
+        run_gh_command([
+            "release", "create", tag_name,
+            "--title", tag_name,
+            "--notes", notes
+        ])
+    except Exception as e:
+        print(f"⚠️  Failed to create GitHub release: {e}")
 
 # Version Sync logic integrated
 import re
