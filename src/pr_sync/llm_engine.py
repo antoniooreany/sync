@@ -37,47 +37,19 @@ def _get_best_gemini_model(api_key: str) -> str:
     return "models/gemini-2.0-flash"
 
 def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Optional[str]:
-    """Sends a generic prompt to the configured LLM API (Ollama, Anthropic, or Gemini)."""
+    """Sends a generic prompt to the local Ollama LLM API (always enforces local models)."""
     ollama_model_raw = custom_model if custom_model else os.environ.get("OLLAMA_MODEL")
-    ollama_model = ollama_model_raw.strip() if ollama_model_raw else None
-    anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
-    gemini_key = os.environ.get("GEMINI_API_KEY")
+    # Enforce local Ollama: default to "llama3" if no model specified
+    ollama_model = ollama_model_raw.strip() if ollama_model_raw else "llama3"
     
-    if not ollama_model and not anthropic_key and not gemini_key:
-        print("No OLLAMA_MODEL, ANTHROPIC_API_KEY, or GEMINI_API_KEY found.")
-        return None
-
-    if ollama_model:
-        print(f" ⚙️  Using local Ollama API (Model: {ollama_model})...")
-        url = "http://127.0.0.1:11434/api/generate"
-        payload = {
-            "model": ollama_model,
-            "prompt": prompt,
-            "stream": False
-        }
-        headers = {"Content-Type": "application/json"}
-    elif anthropic_key:
-        print(" ⚙️  Using Anthropic Claude API...")
-        url = "https://api.anthropic.com/v1/messages"
-        payload = {
-            "model": "claude-3-haiku-20240307",
-            "max_tokens": 1024,
-            "messages": [{"role": "user", "content": prompt}]
-        }
-        headers = {
-            "x-api-key": anthropic_key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json"
-        }
-    else:
-        print(" ⚙️  Using Google Gemini API...")
-        model_name = _get_best_gemini_model(gemini_key)
-        url = f"https://generativelanguage.googleapis.com/v1beta/{model_name}:generateContent?key={gemini_key}"
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.2}
-        }
-        headers = {"Content-Type": "application/json"}
+    print(f" ⚙️  Using local Ollama API (Model: {ollama_model})...")
+    url = "http://127.0.0.1:11434/api/generate"
+    payload = {
+        "model": ollama_model,
+        "prompt": prompt,
+        "stream": False
+    }
+    headers = {"Content-Type": "application/json"}
 
     req = urllib.request.Request(
         url,
@@ -94,13 +66,8 @@ def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Opt
             with urllib.request.urlopen(req, timeout=120.0) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
                 elapsed = time.time() - start_time
-                print(f" ✨ LLM API call completed in {elapsed:.2f} seconds.")
-                if ollama_model:
-                    return data["response"]
-                elif anthropic_key:
-                    return data["content"][0]["text"]
-                else:
-                    return data["candidates"][0]["content"]["parts"][0]["text"]
+                print(f" ✨ Local LLM API call completed in {elapsed:.2f} seconds.")
+                return data["response"]
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt < retries - 1:
                 print(f" ⚠️  Rate limited (429). Retrying in {delay} seconds (Attempt {attempt+1}/{retries})...")
@@ -108,14 +75,14 @@ def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Opt
                 delay *= 2
                 continue
                 
-            print(f" ❌ API Error: {e}")
+            print(f" ❌ Local API Error: {e}")
             try:
                 print(f"    Response body: {e.read().decode('utf-8')}")
             except:
                 pass
             return None
         except Exception as e:
-            print(f" ❌ API Error: {e}")
+            print(f" ❌ Local API Error: {e}")
             return None
             
     return None
