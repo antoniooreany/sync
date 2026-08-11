@@ -150,5 +150,14 @@ def compress():
         "stderr": result.stderr,
     })
 
+@app.route("/download", methods=["GET"])
+def download_release():
+    """Download the generated release zip file."""
+    from flask import send_file
+    target_path = "C:/Users/anton/Projects/SboxGame/Release/SboxGame_v1.1.1.zip"
+    if not os.path.exists(target_path):
+        return "Archive not found. Please click 'Create Release Zip' first.", 404
+    return send_file(target_path, as_attachment=True)
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
