@@ -27,8 +27,8 @@
             <form id="prForm">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="prBase">Base branch</label>
-                        <input type="text" id="prBase" value="develop" placeholder="develop" required />
+                        <label for="base">Base branch</label>
+                        <input type="text" id="base" name="base" value="develop" placeholder="develop" required />
                     </div>
                     <div class="form-group">
                         <label for="prModel">LLM model (optional)</label>
@@ -262,7 +262,7 @@
         // PR SYNC
         document.getElementById('prForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const base = document.getElementById('prBase').value.trim();
+            const base = document.getElementById('base').value.trim();
             const model = document.getElementById('prModel').value.trim();
             const args = ['--base', base];
             if (model) args.push('--model', model);
