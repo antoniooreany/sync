@@ -68,7 +68,11 @@ def run_command():
         f_stderr = io.StringIO()
         
         returncode = 0
+        cwd_backup = os.getcwd()
         try:
+            # Change directory to CWD so that functions relying on os.getcwd() or Path.cwd() resolve properly
+            os.chdir(CWD)
+            
             # Dynamically import the module and locate its main()
             mod = importlib.import_module(module_name)
             with redirect_stdout(f_stdout), redirect_stderr(f_stderr):
@@ -85,6 +89,7 @@ def run_command():
             returncode = 1
         finally:
             sys.argv = old_argv
+            os.chdir(cwd_backup)
             
         return jsonify({
             "returncode": returncode,
