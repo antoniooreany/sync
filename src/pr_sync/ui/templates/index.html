@@ -17,13 +17,21 @@
             <label for="model">LLM model (optional)</label>
             <input type="text" id="model" name="model" placeholder="ollama/phi" />
 
-            <button type="submit">Run Sync</button>
+            <button type="submit" id="syncBtn">Run Sync</button>
+            <button type="button" id="compressBtn">📦 Create Release Zip</button>
         </form>
+
         <pre id="output" class="output"></pre>
+        <pre id="compressOutput" class="output"></pre>
     </div>
+
     <script>
         const form = document.getElementById('syncForm');
         const output = document.getElementById('output');
+        const compressOutput = document.getElementById('compressOutput');
+        const compressBtn = document.getElementById('compressBtn');
+
+        // ---- Sync ----
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             output.textContent = '🔄 Running…';
@@ -41,10 +49,29 @@
                 if (result.returncode === 0) {
                     output.textContent = `✅ Success\n\n${result.stdout}`;
                 } else {
-                    output.textContent = `❌ Error (code ${result.returncode})\n\n${result.stderr}`;
+                    output.textContent = `❌ Error (code ${result.returncode})\n\n${result.stderr || result.stdout}`;
                 }
             } catch (err) {
                 output.textContent = '⚠️ Request failed: ' + err;
+            }
+        });
+
+        // ---- Compress ----
+        compressBtn.addEventListener('click', async () => {
+            compressOutput.textContent = '📦 Creating zip…';
+            compressBtn.disabled = true;
+            try {
+                const resp = await fetch('/compress', { method: 'POST' });
+                const result = await resp.json();
+                if (result.returncode === 0) {
+                    compressOutput.textContent = `✅ Archive created\n\n${result.stdout}`;
+                } else {
+                    compressOutput.textContent = `❌ Zip error (code ${result.returncode})\n\n${result.stderr || result.stdout}`;
+                }
+            } catch (err) {
+                compressOutput.textContent = '⚠️ Request failed: ' + err;
+            } finally {
+                compressBtn.disabled = false;
             }
         });
     </script>
