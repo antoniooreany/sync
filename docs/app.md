@@ -1,76 +1,76 @@
-# PR Sync Python Module Documentation
+# Sync Module Documentation
 
-## 1. Module Description and Design
+The `sync` module is designed to manage various tasks related to syncing and maintaining monorepo projects. It provides two main routes: `/run` and `/compress`.
 
-The `pr_sync` module is designed to automate the process of syncing pull requests (PRs) in a software development project. The primary purpose of this module is to ensure that changes from one branch are seamlessly integrated into another, which helps maintain code quality and consistency across different development teams.
+## Module Description
 
-### Key Features:
-- **Synchronous Execution**: All sync processes run synchronously within the current Python environment, providing immediate feedback.
-- **CLI Integration**: The module integrates with a custom CLI (`pr_sync.cli`) for advanced configuration and customization.
-- **Error Handling**: The module includes robust error handling to manage failures gracefully.
-- **Documentation**: Comprehensive documentation is available in Markdown format, making it easy for users to understand how to use the module.
+This module includes functions for executing specific target scripts with parameters, as well as a feature to compress SboxGame Windows builds using PowerShell.
 
-### Design Goals:
-1. **Scalability**: The module should be able to handle a large number of PRs concurrently without performance degradation.
-2. **Flexibility**: Users should have the ability to customize various aspects of the sync process through the CLI.
-3. **Ease of Use**: The module should provide clear, step-by-step instructions for users to set up and use the sync functionality.
+### Class and Function Reference
 
-## 2. Class and Function Reference
+#### `sync.run_command`
 
-### Classes
-- **PrSyncApp**:
-  - Methods:
-    - `__init__`: Initializes the Flask application instance.
-    - `index()`: Renders the main UI page.
-    - `sync()`: Executes the PR sync process with parameters from the UI.
+**Description:** Executes the specified script with given arguments in the local monorepo directory.
 
-### Functions
-- **main()**: Entry point of the Flask application.
-- **compress():** Runs PowerShell to compress a build directory into a zip file suitable for release.
+**Parameters:**
+- **script (str):** The name of the target script. Supported scripts include:
+  - `pr`: `pr_sync.cli`
+  - `rl`: `release_sync.cli`
+  - `dp`: `dependabot_sync.cli`
+  - `glnt`: `gitlint_sync.cli`
+  - `cm`: `gitlint_sync.commit_generator`
+  - `gf`: `gitflow_sync.cli`
+  - `fs`: `feature_sync.cli`
+  - `vs`: `version_sync.cli`
 
-#### Parameters and Return Types:
-- **PrSyncApp.sync():**
-  - Parameters:
-    - `base`: String, the base branch for the sync process (default: "develop").
-    - `model`: Optional string, optional model name for customizing the sync process.
-  - Returns:
-    - Dictionary with keys `"returncode"`, `"stdout"`, and `"stderr"` representing the execution result.
+- **args (list):** A list of arguments to pass to the target script. The order and number of arguments are not specified, but the provided parameters should be valid for the respective script.
 
-- **PrSyncApp.index():**
-  - Parameters:
-    - None
-  - Returns:
-    - Rendered HTML template containing the main UI page.
+**Return Type:**
+- **dict:** A dictionary containing the return code (`returncode`), standard output (`stdout`), and standard error (`stderr`) from the executed script.
 
-#### Exceptions Raised:
-- The module does not raise any specific exceptions to the user. Instead, it uses Flask's error handling mechanisms to provide clear feedback in the UI.
+**Exceptions Raised:**
+- **ValueError:** If an invalid script name is provided.
+- **subprocess.CalledProcessError:** If the command execution fails with a non-zero exit status.
 
-### Practical Usage Examples
+#### `sync.compress`
 
-1. **Setting Up the Sync Application:**
-   ```bash
-   python app.py
-   ```
-   This command will start the Flask application on `http://127.0.0.1:5000`.
+**Description:** Runs PowerShell to compress the contents of the specified SboxGame Windows build directory into a ZIP file.
 
-2. **Executing a PR Sync:**
-   Access `http://127.0.0.1:5000/sync` in your web browser or using Postman.
-   Send a POST request to `/sync` with the following JSON payload:
-   ```json
-   {
-       "base": "feature-branch",
-       "model": "CustomModel"
-   }
-   ```
-   This will trigger the sync process for the `feature-branch` branch, using the `CustomModel` model if provided.
+**Parameters:**
+- **None**
 
-3. **Compressing a Build Directory:**
-   Access `http://127.0.0.1:5000/compress` in your web browser or using Postman.
-   This will run PowerShell to compress the contents of the `Builds/Windows` directory into `Release/SboxGame_v1.1.1.zip`.
+**Return Type:**
+- **dict:** A dictionary containing the return code (`returncode`), standard output (`stdout`), and standard error (`stderr`) from the PowerShell command execution.
 
-4. **Error Handling in the UI:**
-   If a file is not found in the build directory, the UI will display an error message indicating no files are present.
+**Exceptions Raised:**
+- **FileNotFoundError:** If the specified build directory does not exist.
+- **subprocess.CalledProcessError:** If the PowerShell command execution fails with a non-zero exit status.
 
-## Conclusion
+## Practical Usage Examples
 
-The `pr_sync` module provides a robust and user-friendly tool for automating PR sync processes in software development projects. With its synchronous execution, CLI integration, and comprehensive documentation, it ensures efficient and reliable code management across teams.
+#### Running a Target Script
+
+To run a specific target script, send a POST request to `/run` with the appropriate JSON payload. For example:
+
+```json
+{
+    "script": "pr",
+    "args": ["list", "of", "arguments"]
+}
+```
+
+This will execute the `pr_sync.cli` script with the provided arguments and return the output in JSON format.
+
+#### Compressing a Build Directory
+
+To compress the SboxGame Windows build directory, send a POST request to `/compress`. For example:
+
+```json
+{
+    // No parameters needed for this endpoint
+}
+```
+
+This will run the PowerShell command to zip up the contents of the `Builds/Windows` directory into `Release/SboxGame_v1.1.1.zip`.
+
+These examples demonstrate how to interact with the `sync` module using Python, ensuring that tasks related to project synchronization and management are efficiently managed.

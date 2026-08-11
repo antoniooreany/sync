@@ -1,118 +1,47 @@
-# Sync UI Module Documentation
+### Module: `pr_sync.ui.main`
 
-## Module Description
+#### Purpose and Design
 
-The `sync_ui` module is a Python package designed to create and manage a web-based user interface (UI) for synchronizing data between different systems. It includes components such as a Flask application, a RESTful API, and a database integration mechanism.
+The `pr_sync.ui.main` module serves as the entry point for the Flask application used in the `pr_sync.ui` package. This module is responsible for initializing the Flask environment, creating an instance of the Flask app, and starting the development server.
 
-### Design Highlights
+#### Class and Function Reference
 
-1. **Flask Application**: Utilizes the Flask framework to build the UI. The `app` module contains all the necessary routes and views to manage user interactions.
-2. **RESTful API**: Provides a set of endpoints for data synchronization operations such as adding items, deleting items, updating items, and retrieving item lists. These endpoints are implemented using Flask RESTful extensions like Flask-RESTful-JWT for secure authentication and authorization.
-3. **Database Integration**: Uses SQLAlchemy to interact with a PostgreSQL database. The `db` module manages the database schema and provides methods to perform CRUD operations on various tables.
-4. **Security**: Implements JWT authentication for securing API endpoints. This ensures that only authenticated users can access sensitive data.
+| Class/Function Name | Parameters | Return Type | Exceptions Raised |
+|---------------------|------------|-------------|------------------|
+| `main()`          | None        | None         | `KeyError`       |
 
-### Class and Function Reference
+##### main() Function
 
-#### Main Entry Point (`main`)
-- **Description**: The main entry point of the `sync_ui` module.
-- **Parameters**:
-  - None
-- **Return Type**: None
-- **Raises**:
-  - Exception: If an error occurs during the application startup.
+The `main()` function is the entry point for the module. It performs the following tasks:
 
-```python
-def main():
-    """Entry point for the sync UI."""
-    # Import inside function to avoid heavy imports when the module is imported elsewhere.
-    from pr_sync.ui.app import app
-    # Run Flask development server
-    app.run(host="127.0.0.1", port=5000, debug=True)
-```
+1. **Importing Flask**: Inside the function, it imports the Flask class from `pr_sync.ui.app`.
+2. **Creating an Instance of Flask App**: An instance of the Flask app is created and assigned to the variable `app`.
+3. **Running the Development Server**: The Flask application is run using the `run()` method with default parameters (`host="127.0.0.1"`, `port=5000`, and `debug=True`).
 
-#### App Module (`pr_sync.ui.app`)
-- **Description**: Contains all the routes and views for the UI.
-- **Parameters**:
-  - None
-- **Return Type**: None
-- **Raises**:
-  - Exception: If an error occurs during application setup.
+#### Practical Usage Examples
+
+To use the `pr_sync.ui.main` module, you need to ensure that the Flask application is correctly set up in the `pr_sync.ui.app` module. Here's a basic example of how to do this:
 
 ```python
-from flask import Flask, request, jsonify
-from flask_restful import Api
+# pr_sync/ui/app.py
+from flask import Flask
 
 app = Flask(__name__)
-api = Api(app)
 
-# Define routes and views here
+@app.route('/')
+def index():
+    return "Hello, World!"
+
+if __name__ == '__main__':
+    main()
 ```
 
-#### DB Module (`pr_sync.ui.db`)
-- **Description**: Manages the database schema and provides methods for CRUD operations.
-- **Parameters**:
-  - None
-- **Return Type**: None
-- **Raises**:
-  - Exception: If an error occurs during database operations.
+Then, you can run the `pr_sync.ui.main` module using the following command:
 
-```python
-from flask_sqlalchemy import SQLAlchemy
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@localhost/dbname'
-db = SQLAlchemy(app)
-
-# Define models and methods here
+```sh
+python pr_sync/ui/main.py
 ```
 
-#### JWT Module (`pr_sync.ui.jwt`)
-- **Description**: Implements JWT authentication for securing API endpoints.
-- **Parameters**:
-  - None
-- **Return Type**: None
-- **Raises**:
-  - Exception: If an error occurs during JWT handling.
+This will start a development server on `http://127.0.0.1:5000/`, displaying "Hello, World!" when you navigate to that URL in your web browser.
 
-```python
-from flask_jwt_extended import create_access_token, jwt_required
-
-@app.route('/login', methods=['POST'])
-def login():
-    # Implement user authentication logic here
-    pass
-
-@app.route('/protected', methods=['GET'])
-@jwt_required()
-def protected():
-    # Implement access control logic here
-    return jsonify({"message": "Access granted!"})
-```
-
-### Practical Usage Examples
-
-#### Starting the Flask Application
-To run the Flask application, execute the following command in your terminal:
-```bash
-python main.py
-```
-This will start the development server on `http://127.0.0.1:5000`.
-
-#### Making API Calls
-Using a tool like Postman or cURL, you can make requests to the Flask API endpoints. For example:
-
-- To add an item:
-  ```bash
-  curl -X POST http://127.0.0.1:5000/items -H "Content-Type: application/json" -d '{"name": "Item 1"}'
-  ```
-
-- To retrieve a list of items:
-  ```bash
-  curl http://127.0.0.1:5000/items
-  ```
-
-- To authenticate and access a protected endpoint:
-  ```bash
-  curl -H "Authorization: Bearer <access_token>" http://127.0.0.1:5000/protected
-  ```
-
-This documentation provides a comprehensive overview of the `sync_ui` module, including its class structure, function reference, and practical usage examples.
+By following these steps and using the provided class and function references, you can effectively utilize the `pr_sync.ui.main` module to start a Flask application for managing synchronization tasks in your Python project.
