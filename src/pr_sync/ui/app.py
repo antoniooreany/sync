@@ -50,8 +50,50 @@ def run_command():
         }), 400
 
     module_name = script_map[script]
-    cmd = [sys.executable, "-m", module_name] + args
+    
+    # Speed optimization: For fast commands, we can run them in-process by mocking sys.argv.
+    # This completely eliminates Python interpreter startup latency (which is ~100-300ms on Windows).
+    # We execute this inside a clean sandbox context to prevent sys.exit() from stopping the Flask server.
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    import importlib
+    
+    # We still use subprocess for 'pr' and 'rl' because they make heavy network calls, write tags, 
+    # and we want to keep them fully isolated, but simple utilities run directly and instantly.
+    if script in ["vs", "dp", "glnt", "gf", "cm"]:
+        old_argv = sys.argv
+        sys.argv = [script] + args
+        
+        f_stdout = io.StringIO()
+        f_stderr = io.StringIO()
+        
+        returncode = 0
+        try:
+            # Dynamically import the module and locate its main()
+            mod = importlib.import_module(module_name)
+            with redirect_stdout(f_stdout), redirect_stderr(f_stderr):
+                try:
+                    mod.main()
+                except SystemExit as se:
+                    if se.code is not None:
+                        if isinstance(se.code, int):
+                            returncode = se.code
+                        else:
+                            returncode = 1 if se.code else 0
+        except Exception as e:
+            f_stderr.write(f"Execution failed: {str(e)}")
+            returncode = 1
+        finally:
+            sys.argv = old_argv
+            
+        return jsonify({
+            "returncode": returncode,
+            "stdout": f_stdout.getvalue(),
+            "stderr": f_stderr.getvalue()
+        })
 
+    # Fallback to subprocess for heavy scripts (pr, rl, etc.)
+    cmd = [sys.executable, "-m", module_name] + args
     result = subprocess.run(
         cmd,
         capture_output=True,
