@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sync UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+    <div class="container">
+        <h1>🛠️ Sync PR Generator</h1>
+        <form id="syncForm">
+            <label for="base">Base branch</label>
+            <input type="text" id="base" name="base" placeholder="develop" required />
+
+            <label for="model">LLM model (optional)</label>
+            <input type="text" id="model" name="model" placeholder="ollama/phi" />
+
+            <button type="submit">Run Sync</button>
+        </form>
+        <pre id="output" class="output"></pre>
+    </div>
+    <script>
+        const form = document.getElementById('syncForm');
+        const output = document.getElementById('output');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            output.textContent = '🔄 Running…';
+            const data = {
+                base: form.base.value.trim() || 'develop',
+                model: form.model.value.trim() || undefined,
+            };
+            try {
+                const resp = await fetch('/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const result = await resp.json();
+                if (result.returncode === 0) {
+                    output.textContent = `✅ Success\n\n${result.stdout}`;
+                } else {
+                    output.textContent = `❌ Error (code ${result.returncode})\n\n${result.stderr}`;
+                }
+            } catch (err) {
+                output.textContent = '⚠️ Request failed: ' + err;
+            }
+        });
+    </script>
+</body>
+</html>
