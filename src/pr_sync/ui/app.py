@@ -132,9 +132,11 @@ def compress():
             "stderr": f"No files found in {build_dir}",
             "stdout": "",
         })
+    # In PowerShell, multiple paths passed to -Path must be separated by commas, not spaces.
+    # Alternatively, we can use a wildcard path string or comma-joined array.
     ps_cmd = (
         "Compress-Archive -Path "
-        + " ".join([shlex.quote(str(p)) for p in files])
+        + ", ".join([f"'{str(p)}'" for p in files])
         + " -DestinationPath 'C:/Users/anton/Projects/SboxGame/Release/SboxGame_v1.1.1.zip' -Force"
     )
     result = subprocess.run([
