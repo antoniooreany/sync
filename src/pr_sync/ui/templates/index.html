@@ -28,7 +28,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="base">Base branch</label>
-                        <input type="text" id="base" name="base" value="develop" placeholder="develop" required />
+                        <select id="base" name="base" required>
+                            {% for branch in branches %}
+                            <option value="{{ branch }}" {% if branch == "develop" %}selected{% endif %}>{{ branch }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="prModel">LLM model (optional)</label>
