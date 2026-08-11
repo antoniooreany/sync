@@ -1,5 +1,10 @@
 # Repository Automation Toolkit: Usage Guide
 
+**New shortcut:**
+```
+sync  # runs the same as `pr` – synchronizes PRs
+```
+
 This guide describes how to use the automation tools (`dp`, `glnt`, `pr`, and `rl`) together to manage repository health, enforce commit formatting, generate pull requests, and automate version releases.
 
 ---

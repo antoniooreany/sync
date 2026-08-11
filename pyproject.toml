@@ -8,11 +8,13 @@ authors = [
 requires-python = ">=3.9"
 dependencies = [
     "requests",
-    "google-genai"
+    "google-genai",
+    "flask"
 ]
 
 [project.scripts]
 pr   = "pr_sync.cli:main"
+sync = "pr_sync.cli:main"
 rl   = "release_sync.cli:main"
 dp   = "dependabot_sync.cli:main"
 glnt = "gitlint_sync.cli:main"
