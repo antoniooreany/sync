@@ -14,7 +14,7 @@ dependencies = [
 
 [project.scripts]
 pr   = "pr_sync.cli:main"
-sync = "pr_sync.cli:main"
+sync = "sync.__main__:main"
 rl   = "release_sync.cli:main"
 dp   = "dependabot_sync.cli:main"
 glnt = "gitlint_sync.cli:main"
