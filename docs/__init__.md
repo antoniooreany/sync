@@ -1,80 +1,99 @@
-# UI Package for Sync Tool
+### Sync Package Documentation
 
-## Purpose and Design
+#### Module Description
 
-The UI package is designed to provide a user-friendly interface for interacting with the sync tool. The primary goal of this package is to facilitate smooth file synchronization processes across various platforms.
+The `sync` module is a collection of utility functions designed to facilitate synchronization tasks across different systems. It provides a simple and efficient way to handle file operations, network connections, and other common synchronization operations.
 
-### Key Components
+#### Class and Function Reference
 
-1. **Main Window**: The main window serves as the entry point of the application, where users can interact with the tools.
-2. **File Manager**: This component provides a list view of files and directories, allowing users to navigate and manage their files.
-3. **Upload/Download Functions**: The UI package includes functions for uploading and downloading files between different locations.
-4. **Notification System**: A notification system is used to inform users about the status of file transfers.
-5. **Settings Manager**: This component allows users to configure various settings, such as connection options and preferences.
+##### File Operations
 
-### Class and Function Reference
+- **`open_file(file_path, mode)`**
+  - *Parameters:*
+    - `file_path` (str): The path to the file to be opened.
+    - `mode` (str): The mode in which the file should be opened. Supported modes include `'r'`, `'w'`, `'a'`, and `'x'`.
+  - *Return Type:* A file object that can be used for reading, writing, or appending data to the file.
+  - *Exceptions Raised:*
+    - `FileNotFoundError`: If the specified file does not exist.
+    - `PermissionError`: If the user does not have permission to access the file.
 
-#### Main Window Class
+- **`read_file(file_path)`**
+  - *Parameters:*
+    - `file_path` (str): The path to the file to be read.
+  - *Return Type:* A string containing the content of the file.
+  - *Exceptions Raised:*
+    - `FileNotFoundError`: If the specified file does not exist.
 
-- **Initialization**:
-  - `__init__(self)`: Initializes the main window.
-  - `setupUi(self)`: Sets up the user interface components.
-  - `on_open_clicked(self)`: Handles the click event on the open file button.
-  - `on_upload_clicked(self)`: Handles the click event on the upload file button.
-  - `on_download_clicked(self)`: Handles the click event on the download file button.
+- **`write_file(file_path, data)`**
+  - *Parameters:*
+    - `file_path` (str): The path to the file to be written to.
+    - `data` (str): The content to be written to the file.
+  - *Return Type:* None
+  - *Exceptions Raised:*
+    - `FileNotFoundError`: If the specified file does not exist.
 
-- **Methods**:
-  - `display_message(self, message)`: Displays a message in the notification area.
-  - `open_file_dialog(self)`: Opens a file dialog to allow users to select files for upload or download.
-  - `upload_file(self, file_path)`: Uploads a file from the specified path.
-  - `download_file(self, file_path)`: Downloads a file to the specified path.
+- **`append_file(file_path, data)`**
+  - *Parameters:*
+    - `file_path` (str): The path to the file to be appended to.
+    - `data` (str): The content to be appended to the file.
+  - *Return Type:* None
+  - *Exceptions Raised:*
+    - `FileNotFoundError`: If the specified file does not exist.
 
-#### File Manager Class
+##### Network Connections
 
-- **Initialization**:
-  - `__init__(self)`: Initializes the file manager.
+- **`establish_connection(host, port)`**
+  - *Parameters:*
+    - `host` (str): The host address of the server.
+    - `port` (int): The port number of the server.
+  - *Return Type:* A socket object that can be used for communication over the network.
+  - *Exceptions Raised:*
+    - `ConnectionError`: If the connection to the server fails.
 
-- **Methods**:
-  - `list_files(self)`: Retrieves a list of files in the current directory.
-  - `display_file_list(self, file_list)`: Displays the list of files and directories in the file manager.
-  - `select_file(self, file_path)`: Selects a file for upload or download.
+- **`send_data(sock, data)`**
+  - *Parameters:*
+    - `sock` (socket): The socket object used for communication.
+    - `data` (bytes): The data to be sent over the network.
+  - *Return Type:* None
+  - *Exceptions Raised:*
+    - `ConnectionError`: If there is a problem with the connection.
 
-#### Upload/Download Functions
+- **`receive_data(sock)`**
+  - *Parameters:*
+    - `sock` (socket): The socket object used for communication.
+  - *Return Type:* A bytes object containing the received data from the network.
+  - *Exceptions Raised:*
+    - `ConnectionError`: If there is a problem with the connection.
 
-- **upload_file(self, file_path)**: Uploads a file from the specified path.
-- **download_file(self, file_path)**: Downloads a file to the specified path.
+##### Miscellaneous
 
-### Practical Usage Examples
+- **`create_directory(path)`**
+  - *Parameters:*
+    - `path` (str): The path to the directory to be created.
+  - *Return Type:* None
+  - *Exceptions Raised:*
+    - `FileExistsError`: If the specified directory already exists.
 
-1. **Opening the Main Window**:
-   ```python
-   # Create an instance of the main window
-   app = QApplication([])
-   ui = Ui_MainWindow()
-   ui.setupUi(ui)
+#### Practical Usage Examples
 
-   # Show the main window
-   ui.show()
+```python
+# Importing the sync module
+import sync
 
-   # Execute the application event loop
-   sys.exit(app.exec_())
-   ```
+# Opening a file for reading
+with sync.open_file('example.txt', 'r') as file:
+    content = file.read()
 
-2. **Selecting Files**:
-   ```python
-   # Select a file for upload
-   selected_file = ui.file_manager.select_file()
-   if selected_file:
-       ui.upload_file(selected_file)
-   ```
+# Writing to a file
+sync.write_file('example.txt', 'Hello, world!')
 
-3. **Handling Upload Status**:
-   ```python
-   def on_upload_complete(self, success):
-       if success:
-           ui.display_message("File uploaded successfully")
-       else:
-           ui.display_message("Failed to upload file")
-   ```
+# Establishing a network connection and sending data
+sock = sync.establish_connection('example.com', 80)
+sync.send_data(sock, b'GET / HTTP/1.1\r\nHost: example.com\r\n\r\n')
+response = sync.receive_data(sock)
 
-By following the above class and function references, you can effectively use the UI package for your sync tool to provide a seamless user experience.
+# Creating a directory
+sync.create_directory('my_directory')
+```
+
+This documentation provides an overview of the functionality provided by the `sync` module, along with examples of how to use its classes and functions. The code snippets included demonstrate how to perform various file operations, network connections, and other synchronization tasks using the methods provided in the module.

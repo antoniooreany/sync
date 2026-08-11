@@ -3,77 +3,348 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sync UI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+    <title>Developer Automation Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
-    <div class="container">
-        <h1>🛠️ Sync PR Generator</h1>
-        <form id="syncForm">
-            <label for="base">Base branch</label>
-            <input type="text" id="base" name="base" value="develop" placeholder="develop" required autofocus />
+    <div class="dashboard">
+        <header>
+            <h1>🛠️ Developer Automation Dashboard</h1>
+            <p class="subtitle">Unified Control Panel for Monorepo Tools</p>
+        </header>
 
-            <label for="model">LLM model (optional)</label>
-            <input type="text" id="model" name="model" placeholder="ollama/phi" />
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('pr')">PR Sync (pr)</button>
+            <button class="tab-btn" onclick="switchTab('rl')">Release Sync (rl)</button>
+            <button class="tab-btn" onclick="switchTab('gf')">Gitflow Sync (gf)</button>
+            <button class="tab-btn" onclick="switchTab('glnt')">Gitlint (glnt/cm)</button>
+            <button class="tab-btn" onclick="switchTab('other')">Other Utilities</button>
+        </div>
 
-            <button type="submit" id="syncBtn">Run Sync</button>
-            <button type="button" id="compressBtn">📦 Create Release Zip</button>
-        </form>
+        <!-- PR SYNC TAB -->
+        <div id="pr" class="tab-content active">
+            <form id="prForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prBase">Base branch</label>
+                        <input type="text" id="prBase" value="develop" placeholder="develop" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="prModel">LLM model (optional)</label>
+                        <input type="text" id="prModel" placeholder="ollama/phi" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <button type="submit" id="prSubmit">🚀 Run PR Sync</button>
+                    <button type="button" id="compressBtn" class="secondary-btn">📦 Create Release Zip</button>
+                </div>
+            </form>
+        </div>
 
-        <pre id="output" class="output"></pre>
-        <pre id="compressOutput" class="output"></pre>
+        <!-- RELEASE SYNC TAB -->
+        <div id="rl" class="tab-content">
+            <form id="rlForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rlVersion">Version / Bump</label>
+                        <select id="rlVersion">
+                            <option value="patch">Patch Bump (auto)</option>
+                            <option value="minor">Minor Bump (auto)</option>
+                            <option value="major">Major Bump (auto)</option>
+                            <option value="custom">Custom Version Value</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="rlCustomVerGroup" style="display: none;">
+                        <label for="rlCustomVersion">Custom Version Value (e.g. 0.5.0)</label>
+                        <input type="text" id="rlCustomVersion" placeholder="0.5.0" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rlFrom">From Ref (optional)</label>
+                        <input type="text" id="rlFrom" placeholder="Latest tag" />
+                    </div>
+                    <div class="form-group">
+                        <label for="rlTo">To Ref</label>
+                        <input type="text" id="rlTo" value="HEAD" placeholder="HEAD" />
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rlDryRun" checked />
+                    <label for="rlDryRun">Dry Run (No files will be modified or tagged)</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rlForce" />
+                    <label for="rlForce">Force (Allow version downgrade)</label>
+                </div>
+                <button type="submit">📈 Run Release Sync</button>
+            </form>
+        </div>
+
+        <!-- GITFLOW TAB -->
+        <div id="gf" class="tab-content">
+            <form id="gfForm">
+                <div class="form-group">
+                    <label for="gfCommand">Gitflow Action</label>
+                    <select id="gfCommand" onchange="toggleGfInputs()">
+                        <option value="check">Check Compliance</option>
+                        <option value="start">Start Branch</option>
+                        <option value="finish">Finish Branch</option>
+                    </select>
+                </div>
+                <div class="form-row" id="gfStartInputs" style="display: none;">
+                    <div class="form-group">
+                        <label for="gfType">Branch Type</label>
+                        <select id="gfType">
+                            <option value="feature">Feature</option>
+                            <option value="fix">Fix</option>
+                            <option value="bugfix">Bugfix</option>
+                            <option value="release">Release</option>
+                            <option value="hotfix">Hotfix</option>
+                            <option value="support">Support</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gfName">Branch Name</label>
+                        <input type="text" id="gfName" placeholder="my-awesome-feature" />
+                    </div>
+                </div>
+                <div id="gfFinishInputs" style="display: none;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="gfDryRun" checked />
+                        <label for="gfDryRun">Dry Run (Print updates, do not write changes)</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="gfForce" />
+                        <label for="gfForce">Force override</label>
+                    </div>
+                </div>
+                <button type="submit">🌱 Execute Gitflow Command</button>
+            </form>
+        </div>
+
+        <!-- GITLINT & COMMIT TAB -->
+        <div id="glnt" class="tab-content">
+            <form id="glntForm">
+                <div class="form-group">
+                    <label for="glntAction">Tool Action</label>
+                    <select id="glntAction" onchange="toggleGlntInputs()">
+                        <option value="glnt-init">Initialize Gitlint Config (glnt init)</option>
+                        <option value="cm-auto">Generate Commit Message using AI (cm)</option>
+                        <option value="cm-suggest">Suggest formatted message from input (cm &lt;message&gt;)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="glntMsgGroup" style="display: none;">
+                    <label for="glntRawMsg">Raw Commit Message</label>
+                    <input type="text" id="glntRawMsg" placeholder="add nice styles to frontend" />
+                </div>
+                <div class="checkbox-group" id="glntForceGroup">
+                    <input type="checkbox" id="glntForce" />
+                    <label for="glntForce">Force overwrite configurations</label>
+                </div>
+                <button type="submit">⚙️ Run Gitlint/Commit Helper</button>
+            </form>
+        </div>
+
+        <!-- OTHER TOOLS TAB -->
+        <div id="other" class="tab-content">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Dependabot Sync (dp)</label>
+                    <button type="button" onclick="runOther('dp', ['init'])">🤖 Init Dependabot Config</button>
+                </div>
+                <div class="form-group">
+                    <label>Feature Sync (fs)</label>
+                    <button type="button" onclick="runOther('fs', [])">🔄 Sync Features</button>
+                </div>
+                <div class="form-group">
+                    <label>Version Sync (vs)</label>
+                    <button type="button" onclick="runOther('vs', [])">🔢 Sync Version Across Repo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONSOLE OUTPUT PANEL -->
+        <div class="output-panel">
+            <div class="output-header">
+                <span>Terminal Output</span>
+                <span id="statusBadge" class="status-badge idle">Idle</span>
+            </div>
+            <pre id="outputConsole" class="output-pre">Ready to receive commands...</pre>
+        </div>
     </div>
 
     <script>
-        const form = document.getElementById('syncForm');
-        const output = document.getElementById('output');
-        const compressOutput = document.getElementById('compressOutput');
-        const compressBtn = document.getElementById('compressBtn');
+        const statusBadge = document.getElementById('statusBadge');
+        const outputConsole = document.getElementById('outputConsole');
 
-        // ---- Sync ----
-        form.addEventListener('submit', async (e) => {
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function setStatus(status, text) {
+            statusBadge.className = 'status-badge ' + status;
+            statusBadge.textContent = text;
+        }
+
+        async function post(url, data) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            return await response.json();
+        }
+
+        // Show/hide custom version input
+        document.getElementById('rlVersion').addEventListener('change', (e) => {
+            document.getElementById('rlCustomVerGroup').style.display = e.target.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Gitflow Inputs Toggle
+        function toggleGfInputs() {
+            const cmd = document.getElementById('gfCommand').value;
+            document.getElementById('gfStartInputs').style.display = cmd === 'start' ? 'grid' : 'none';
+            document.getElementById('gfFinishInputs').style.display = cmd === 'finish' ? 'block' : 'none';
+        }
+
+        // Gitlint Inputs Toggle
+        function toggleGlntInputs() {
+            const action = document.getElementById('glntAction').value;
+            document.getElementById('glntMsgGroup').style.display = action === 'cm-suggest' ? 'block' : 'none';
+            document.getElementById('glntForceGroup').style.display = action === 'glnt-init' ? 'flex' : 'none';
+        }
+
+        // Execute general monorepo CLI scripts
+        async function runScript(script, args) {
+            setStatus('running', 'Running…');
+            outputConsole.textContent = `> Running command: python -m ${script} ${args.join(' ')}\n\n`;
+            try {
+                const result = await post('/run', { script, args });
+                if (result.returncode === 0) {
+                    setStatus('success', 'Success');
+                    outputConsole.textContent += `✅ SUCCESS (Exit code 0)\n\n${result.stdout}`;
+                } else {
+                    setStatus('error', 'Error');
+                    outputConsole.textContent += `❌ FAILED (Exit code ${result.returncode})\n\n${result.stderr || result.stdout}`;
+                }
+            } catch (err) {
+                setStatus('error', 'Failed');
+                outputConsole.textContent += `⚠️ Request failed: ${err}`;
+            }
+        }
+
+        // PR SYNC
+        document.getElementById('prForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            output.textContent = '🔄 Running…';
-            const data = {
-                base: form.base.value.trim() || 'develop',
-                model: form.model.value.trim() || undefined,
-            };
+            const base = document.getElementById('prBase').value.trim();
+            const model = document.getElementById('prModel').value.trim();
+            const args = ['--base', base];
+            if (model) args.push('--model', model);
+            await runScript('pr', args);
+        });
+
+        // COMPRESS
+        document.getElementById('compressBtn').addEventListener('click', async () => {
+            setStatus('running', 'Running…');
+            outputConsole.textContent = '> Running Compress-Archive script...\n\n';
             try {
-                const resp = await fetch('/sync', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-                const result = await resp.json();
+                const result = await post('/compress', {});
                 if (result.returncode === 0) {
-                    output.textContent = `✅ Success\n\n${result.stdout}`;
+                    setStatus('success', 'Success');
+                    outputConsole.textContent += `✅ SUCCESS (Zip created)\n\n${result.stdout}`;
                 } else {
-                    output.textContent = `❌ Error (code ${result.returncode})\n\n${result.stderr || result.stdout}`;
+                    setStatus('error', 'Error');
+                    outputConsole.textContent += `❌ FAILED (Exit code ${result.returncode})\n\n${result.stderr || result.stdout}`;
                 }
             } catch (err) {
-                output.textContent = '⚠️ Request failed: ' + err;
+                setStatus('error', 'Failed');
+                outputConsole.textContent += `⚠️ Request failed: ${err}`;
             }
         });
 
-        // ---- Compress ----
-        compressBtn.addEventListener('click', async () => {
-            compressOutput.textContent = '📦 Creating zip…';
-            compressBtn.disabled = true;
-            try {
-                const resp = await fetch('/compress', { method: 'POST' });
-                const result = await resp.json();
-                if (result.returncode === 0) {
-                    compressOutput.textContent = `✅ Archive created\n\n${result.stdout}`;
-                } else {
-                    compressOutput.textContent = `❌ Zip error (code ${result.returncode})\n\n${result.stderr || result.stdout}`;
+        // RELEASE SYNC
+        document.getElementById('rlForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const versionSel = document.getElementById('rlVersion').value;
+            const customVal = document.getElementById('rlCustomVersion').value.trim();
+            const fromRef = document.getElementById('rlFrom').value.trim();
+            const toRef = document.getElementById('rlTo').value.trim();
+            const dryRun = document.getElementById('rlDryRun').checked;
+            const force = document.getElementById('rlForce').checked;
+
+            const args = [];
+            if (versionSel === 'custom') {
+                if (!customVal) {
+                    alert('Please enter custom version');
+                    return;
                 }
-            } catch (err) {
-                compressOutput.textContent = '⚠️ Request failed: ' + err;
-            } finally {
-                compressBtn.disabled = false;
+                args.push(customVal);
+            } else {
+                args.push(versionSel);
+            }
+
+            if (fromRef) args.push('--from', fromRef);
+            if (toRef) args.push('--to', toRef);
+            if (dryRun) args.push('--dry-run');
+            if (force) args.push('--force');
+
+            await runScript('rl', args);
+        });
+
+        // GITFLOW SYNC
+        document.getElementById('gfForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cmd = document.getElementById('gfCommand').value;
+            const args = [cmd];
+
+            if (cmd === 'start') {
+                const type = document.getElementById('gfType').value;
+                const name = document.getElementById('gfName').value.trim();
+                if (!name) {
+                    alert('Please enter branch name');
+                    return;
+                }
+                args.push(type, name);
+            } else if (cmd === 'finish') {
+                if (document.getElementById('gfDryRun').checked) args.push('--dry-run');
+                if (document.getElementById('gfForce').checked) args.push('--force');
+            }
+
+            await runScript('gf', args);
+        });
+
+        // GITLINT & COMMIT
+        document.getElementById('glntForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const action = document.getElementById('glntAction').value;
+            
+            if (action === 'glnt-init') {
+                const args = ['init'];
+                if (document.getElementById('glntForce').checked) args.push('--force');
+                await runScript('glnt', args);
+            } else if (action === 'cm-auto') {
+                await runScript('cm', []);
+            } else if (action === 'cm-suggest') {
+                const msg = document.getElementById('glntRawMsg').value.trim();
+                if (!msg) {
+                    alert('Please enter a raw commit message');
+                    return;
+                }
+                await runScript('cm', [msg]);
             }
         });
+
+        // Other utilities
+        async function runOther(script, args) {
+            await runScript(script, args);
+        }
     </script>
 </body>
 </html>

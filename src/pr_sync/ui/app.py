@@ -1,55 +1,74 @@
 import subprocess
 import sys
 import os
+
+# Disable dotenv warnings and autoloading
 os.environ.setdefault("FLASK_SKIP_DOTENV", "1")
+
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
+# Base directory setup
+CWD = "C:/Users/anton/Projects/sync"
+
 @app.route("/", methods=["GET"])
 def index():
-    """Render the main UI page."""
+    """Render the main dashboard page."""
     return render_template("index.html")
 
-@app.route("/sync", methods=["POST"])
-def sync():
-    """Execute the PR sync process with parameters from the UI.
-
+@app.route("/run", methods=["POST"])
+def run_command():
+    """Execute target monorepo script with parameters.
+    
     Expected JSON payload:
-        {"base": "branch-name", "model": "optional-model-name"}
+        {
+            "script": "pr|rl|dp|glnt|cm|gf|fs|vs",
+            "args": ["list", "of", "arguments"]
+        }
     """
     data = request.get_json(silent=True) or {}
-    base = data.get("base", "develop")
-    model = data.get("model")
+    script = data.get("script")
+    args = data.get("args", [])
 
-    # Build command line arguments for the existing CLI
-    cmd = [sys.executable, "-m", "pr_sync.cli", "--base", base]
-    if model:
-        cmd.extend(["--model", model])
+    script_map = {
+        "pr": "pr_sync.cli",
+        "rl": "release_sync.cli",
+        "dp": "dependabot_sync.cli",
+        "glnt": "gitlint_sync.cli",
+        "cm": "gitlint_sync.commit_generator",
+        "gf": "gitflow_sync.cli",
+        "fs": "feature_sync.cli",
+        "vs": "version_sync.cli"
+    }
 
-    # Run the sync process synchronously and capture output
+    if not script or script not in script_map:
+        return jsonify({
+            "returncode": 1,
+            "stdout": "",
+            "stderr": f"Invalid or missing script name: {script}"
+        }), 400
+
+    module_name = script_map[script]
+    cmd = [sys.executable, "-m", module_name] + args
+
     result = subprocess.run(
         cmd,
         capture_output=True,
         text=True,
-        cwd="C:/Users/anton/Projects/sync",
+        cwd=CWD
     )
 
-    response = {
+    return jsonify({
         "returncode": result.returncode,
         "stdout": result.stdout,
-        "stderr": result.stderr,
-    }
-    return jsonify(response)
+        "stderr": result.stderr
+    })
 
-if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
-
-# New endpoint to create release zip using PowerShell Compress-Archive
 @app.route("/compress", methods=["POST"])
 def compress():
     """Run PowerShell Compress-Archive to bundle SboxGame Windows build.
-    Returns detailed result, including a helpful message when no files are found.
+    Returns detailed result.
     """
     import pathlib, shlex
     build_dir = pathlib.Path(r"C:/Users/anton/Projects/SboxGame/Builds/Windows")
@@ -59,7 +78,6 @@ def compress():
             "stderr": f"Build directory not found: {build_dir}",
             "stdout": "",
         })
-    # Ensure there is at least one file
     files = list(build_dir.glob("*"))
     if not files:
         return jsonify({
@@ -82,3 +100,6 @@ def compress():
         "stdout": result.stdout,
         "stderr": result.stderr,
     })
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000, debug=True)

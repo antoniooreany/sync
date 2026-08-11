@@ -14,3 +14,4 @@ Automatically generated module guides:
 - [gh_api](gh_api.md)
 - [pr_body](pr_body.md)
 - [__init__](__init__.md)
+- [__main__](__main__.md)
