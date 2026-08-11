@@ -1,77 +1,76 @@
-# PR Sync and Release Automation Module
+# PR Sync Python Module Documentation
 
-## Overview
+## 1. Module Description and Design
 
-The `pr_sync` module is designed to automate the process of synchronizing pull requests (PRs) from a remote repository to a local workspace, handling the synchronization with specified branches and models. The module also includes a feature to compress the SboxGame Windows build using PowerShell.
+The `pr_sync` module is designed to automate the process of syncing pull requests (PRs) in a software development project. The primary purpose of this module is to ensure that changes from one branch are seamlessly integrated into another, which helps maintain code quality and consistency across different development teams.
 
-## Classes and Functions Reference
+### Key Features:
+- **Synchronous Execution**: All sync processes run synchronously within the current Python environment, providing immediate feedback.
+- **CLI Integration**: The module integrates with a custom CLI (`pr_sync.cli`) for advanced configuration and customization.
+- **Error Handling**: The module includes robust error handling to manage failures gracefully.
+- **Documentation**: Comprehensive documentation is available in Markdown format, making it easy for users to understand how to use the module.
 
-### `PrSync`
-**Purpose**: Manages the main functionality of the PR sync process.
+### Design Goals:
+1. **Scalability**: The module should be able to handle a large number of PRs concurrently without performance degradation.
+2. **Flexibility**: Users should have the ability to customize various aspects of the sync process through the CLI.
+3. **Ease of Use**: The module should provide clear, step-by-step instructions for users to set up and use the sync functionality.
 
-#### Methods:
-- **`__init__(self)`**: Initializes the `PrSync` class.
-  - Parameters: N/A
-  - Return Type: None
+## 2. Class and Function Reference
 
-- **`execute_sync(self, base, model=None)`**: Executes the PR sync process.
+### Classes
+- **PrSyncApp**:
+  - Methods:
+    - `__init__`: Initializes the Flask application instance.
+    - `index()`: Renders the main UI page.
+    - `sync()`: Executes the PR sync process with parameters from the UI.
+
+### Functions
+- **main()**: Entry point of the Flask application.
+- **compress():** Runs PowerShell to compress a build directory into a zip file suitable for release.
+
+#### Parameters and Return Types:
+- **PrSyncApp.sync():**
   - Parameters:
-    - `base` (str): The base branch to synchronize with. Defaults to "develop".
-    - `model` (str, optional): The model to use for synchronization. Defaults to `None`.
-  - Return Type: A dictionary containing the return code and standard output/error of the sync process.
+    - `base`: String, the base branch for the sync process (default: "develop").
+    - `model`: Optional string, optional model name for customizing the sync process.
+  - Returns:
+    - Dictionary with keys `"returncode"`, `"stdout"`, and `"stderr"` representing the execution result.
 
-### `CompressBuild`
-**Purpose**: Manages the creation of a compressed zip file for the SboxGame Windows build.
+- **PrSyncApp.index():**
+  - Parameters:
+    - None
+  - Returns:
+    - Rendered HTML template containing the main UI page.
 
-#### Methods:
-- **`__init__(self)`**: Initializes the `CompressBuild` class.
-  - Parameters: N/A
-  - Return Type: None
+#### Exceptions Raised:
+- The module does not raise any specific exceptions to the user. Instead, it uses Flask's error handling mechanisms to provide clear feedback in the UI.
 
-- **`compress_zip(self)`**: Compresses the SboxGame Windows build using PowerShell and returns the path to the compressed zip file.
-  - Parameters: N/A
-  - Return Type: A string representing the path to the compressed zip file.
+### Practical Usage Examples
 
-## Practical Usage Examples
+1. **Setting Up the Sync Application:**
+   ```bash
+   python app.py
+   ```
+   This command will start the Flask application on `http://127.0.0.1:5000`.
 
-#### Example of Using the `PrSync` Class
+2. **Executing a PR Sync:**
+   Access `http://127.0.0.1:5000/sync` in your web browser or using Postman.
+   Send a POST request to `/sync` with the following JSON payload:
+   ```json
+   {
+       "base": "feature-branch",
+       "model": "CustomModel"
+   }
+   ```
+   This will trigger the sync process for the `feature-branch` branch, using the `CustomModel` model if provided.
 
-To use the `PrSync` class, you need to first initialize it with the base branch and model. Then, you can call the `execute_sync` method to execute the sync process.
+3. **Compressing a Build Directory:**
+   Access `http://127.0.0.1:5000/compress` in your web browser or using Postman.
+   This will run PowerShell to compress the contents of the `Builds/Windows` directory into `Release/SboxGame_v1.1.1.zip`.
 
-```python
-from pr_sync import PrSync
+4. **Error Handling in the UI:**
+   If a file is not found in the build directory, the UI will display an error message indicating no files are present.
 
-# Initialize the PrSync class
-pr_sync = PrSync()
+## Conclusion
 
-# Define the base branch and optional model
-base_branch = "feature-branch"
-model_name = "latest-release"
-
-try:
-    # Execute the PR sync process
-    response = pr_sync.execute_sync(base_branch, model_name)
-    print("Sync Process Response:", response)
-except Exception as e:
-    print(f"An error occurred: {e}")
-```
-
-#### Example of Using the `CompressBuild` Class
-
-To use the `CompressBuild` class, you need to first initialize it. Then, you can call the `compress_zip` method to compress the SboxGame Windows build.
-
-```python
-from pr_sync import CompressBuild
-
-# Initialize the CompressBuild class
-compress_build = CompressBuild()
-
-try:
-    # Create a compressed zip file for the SboxGame Windows build
-    zip_path = compress_build.compress_zip()
-    print("Compressed Zip File Path:", zip_path)
-except Exception as e:
-    print(f"An error occurred: {e}")
-```
-
-This markdown documentation provides a clear and concise overview of the `pr_sync` module, its classes, methods, and usage examples.
+The `pr_sync` module provides a robust and user-friendly tool for automating PR sync processes in software development projects. With its synchronous execution, CLI integration, and comprehensive documentation, it ensures efficient and reliable code management across teams.

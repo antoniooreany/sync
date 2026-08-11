@@ -1,170 +1,80 @@
 # UI Package for Sync Tool
 
-## Module Description
+## Purpose and Design
 
-The UI package is designed to provide a user-friendly interface for interacting with the sync tool. It includes components such as login, dashboard, settings, and file synchronization functionalities.
+The UI package is designed to provide a user-friendly interface for interacting with the sync tool. The primary goal of this package is to facilitate smooth file synchronization processes across various platforms.
 
-### Design
+### Key Components
 
-1. **Login**: The login component allows users to authenticate with their account.
-2. **Dashboard**: The dashboard provides an overview of the current status of the sync tool.
-3. **Settings**: The settings component allows users to configure various parameters such as server URLs, authentication tokens, and backup schedules.
-4. **File Synchronization**: The file synchronization component manages the transfer of files between the local machine and the remote server.
+1. **Main Window**: The main window serves as the entry point of the application, where users can interact with the tools.
+2. **File Manager**: This component provides a list view of files and directories, allowing users to navigate and manage their files.
+3. **Upload/Download Functions**: The UI package includes functions for uploading and downloading files between different locations.
+4. **Notification System**: A notification system is used to inform users about the status of file transfers.
+5. **Settings Manager**: This component allows users to configure various settings, such as connection options and preferences.
 
 ### Class and Function Reference
 
-#### 1. `LoginManager`
+#### Main Window Class
 
-```python
-class LoginManager:
-    def __init__(self, username: str, password: str):
-        self.username = username
-        self.password = password
+- **Initialization**:
+  - `__init__(self)`: Initializes the main window.
+  - `setupUi(self)`: Sets up the user interface components.
+  - `on_open_clicked(self)`: Handles the click event on the open file button.
+  - `on_upload_clicked(self)`: Handles the click event on the upload file button.
+  - `on_download_clicked(self)`: Handles the click event on the download file button.
 
-    def authenticate(self) -> bool:
-        # Authenticate using the provided credentials
-        return True  # Placeholder for actual authentication logic
+- **Methods**:
+  - `display_message(self, message)`: Displays a message in the notification area.
+  - `open_file_dialog(self)`: Opens a file dialog to allow users to select files for upload or download.
+  - `upload_file(self, file_path)`: Uploads a file from the specified path.
+  - `download_file(self, file_path)`: Downloads a file to the specified path.
 
-    def logout(self):
-        # Log out of the current session
-        pass
-```
+#### File Manager Class
 
-#### 2. `Dashboard`
+- **Initialization**:
+  - `__init__(self)`: Initializes the file manager.
 
-```python
-class Dashboard:
-    def __init__(self, client: Client):
-        self.client = client
+- **Methods**:
+  - `list_files(self)`: Retrieves a list of files in the current directory.
+  - `display_file_list(self, file_list)`: Displays the list of files and directories in the file manager.
+  - `select_file(self, file_path)`: Selects a file for upload or download.
 
-    def fetch_status(self) -> dict:
-        # Fetch the status of the sync tool
-        return {'status': 'connected', 'messages': ['All files synchronized']}
+#### Upload/Download Functions
 
-    def display_status(self):
-        # Display the status information in a user-friendly format
-        print("Sync Tool Status:")
-        for message in self.fetch_status().get('messages'):
-            print(f" - {message}")
-```
-
-#### 3. `SettingsManager`
-
-```python
-class SettingsManager:
-    def __init__(self, config: dict):
-        self.config = config
-
-    def update_server_url(self, new_url: str):
-        # Update the server URL in the configuration
-        self.config['server_url'] = new_url
-
-    def save_settings(self):
-        # Save the updated settings to a file or database
-        pass
-```
-
-#### 4. `FileSynchronizationManager`
-
-```python
-class FileSynchronizationManager:
-    def __init__(self, client: Client):
-        self.client = client
-
-    def upload_file(self, local_path: str, remote_path: str) -> bool:
-        # Upload a file from the local machine to the remote server
-        return True  # Placeholder for actual upload logic
-
-    def download_file(self, remote_path: str, local_path: str) -> bool:
-        # Download a file from the remote server to the local machine
-        return True  # Placeholder for actual download logic
-```
+- **upload_file(self, file_path)**: Uploads a file from the specified path.
+- **download_file(self, file_path)**: Downloads a file to the specified path.
 
 ### Practical Usage Examples
 
-#### Example of Logging In and Authenticating
+1. **Opening the Main Window**:
+   ```python
+   # Create an instance of the main window
+   app = QApplication([])
+   ui = Ui_MainWindow()
+   ui.setupUi(ui)
 
-```python
-from ui.login_manager import LoginManager
+   # Show the main window
+   ui.show()
 
-# Create a login manager instance with username and password
-login_manager = LoginManager('user123', 'pass456')
+   # Execute the application event loop
+   sys.exit(app.exec_())
+   ```
 
-try:
-    # Authenticate the user
-    if login_manager.authenticate():
-        print("Login successful.")
-    else:
-        print("Failed to authenticate.")
+2. **Selecting Files**:
+   ```python
+   # Select a file for upload
+   selected_file = ui.file_manager.select_file()
+   if selected_file:
+       ui.upload_file(selected_file)
+   ```
 
-except Exception as e:
-    print(f"An error occurred: {e}")
-```
+3. **Handling Upload Status**:
+   ```python
+   def on_upload_complete(self, success):
+       if success:
+           ui.display_message("File uploaded successfully")
+       else:
+           ui.display_message("Failed to upload file")
+   ```
 
-#### Example of Fetching and Displaying Dashboard Status
-
-```python
-from ui.dashboard import Dashboard
-
-# Create a dashboard instance using a client object
-dashboard = Dashboard(Client())
-
-try:
-    # Fetch the status of the sync tool
-    status = dashboard.fetch_status()
-    
-    # Display the status information
-    dashboard.display_status()
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-```
-
-#### Example of Updating Server URL and Saving Settings
-
-```python
-from ui.settings_manager import SettingsManager
-
-# Create a settings manager instance with initial configuration
-settings_manager = SettingsManager({'server_url': 'https://example.com'})
-
-try:
-    # Update the server URL
-    settings_manager.update_server_url('https://new.example.com')
-
-    # Save the updated settings
-    if settings_manager.save_settings():
-        print("Settings saved successfully.")
-    else:
-        print("Failed to save settings.")
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-```
-
-#### Example of Uploading and Downloading a File
-
-```python
-from ui.file_synchronization_manager import FileSynchronizationManager
-
-# Create a file synchronization manager instance using a client object
-file_sync_manager = FileSynchronizationManager(Client())
-
-try:
-    # Upload a file from the local machine to the remote server
-    if file_sync_manager.upload_file('/path/to/local/file.txt', '/path/to/remote/file.txt'):
-        print("File uploaded successfully.")
-    else:
-        print("Failed to upload file.")
-
-    # Download a file from the remote server to the local machine
-    if file_sync_manager.download_file('/path/to/remote/file.txt', '/path/to/local/downloaded_file.txt'):
-        print("File downloaded successfully.")
-    else:
-        print("Failed to download file.")
-
-except Exception as e:
-    print(f"An error occurred: {e}")
-```
-
-This markdown documentation provides detailed information on the UI package, its classes and functions, and practical usage examples.
+By following the above class and function references, you can effectively use the UI package for your sync tool to provide a seamless user experience.
