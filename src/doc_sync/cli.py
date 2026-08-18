@@ -15,12 +15,18 @@ def get_staged_files() -> list[str]:
         return []
 
 def get_all_src_files() -> list[str]:
-    # Return all .py files in src/
+    # Return all supported source files in src/
     root = Path.cwd()
     src_dir = root / "src"
     if not src_dir.exists():
         return []
-    return [str(p.relative_to(root)) for p in src_dir.rglob("*.py") if p.is_file()]
+    
+    supported = {".py", ".js", ".ts", ".go", ".rs", ".java", ".cpp", ".c", ".cs"}
+    files = []
+    for p in src_dir.rglob("*"):
+        if p.is_file() and p.suffix in supported:
+            files.append(str(p.relative_to(root)))
+    return files
 
 def main():
     if sys.platform == "win32":
@@ -31,7 +37,7 @@ def main():
             pass
 
     parser = argparse.ArgumentParser(description="Documentation Generator (doc)")
-    parser.add_argument("--all", action="store_true", help="Generate docs for all files in src/")
+    parser.add_argument("--all", action="store_true", help="Generate docs for all supported source files in src/")
     parser.add_argument("--staged", action="store_true", help="Generate docs for staged files (default if no args)")
     parser.add_argument("files", nargs="*", help="Specific files to generate docs for")
     args = parser.parse_args()
@@ -66,7 +72,7 @@ def main():
         if generated:
             print(f"🎉 Successfully generated and staged docs for {len(generated)} file(s).")
         else:
-            print("ℹ️ No documentation was generated (maybe no Python files were in the list).")
+            print("ℹ️ No documentation was generated (maybe no supported source files were in the list).")
     except Exception as e:
         print(f"❌ Failed to generate documentation: {e}")
         sys.exit(1)
