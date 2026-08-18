@@ -1,11 +1,29 @@
+import subprocess
+import sys
+
 def main():
-    """Entry point for the sync UI.
-    Executes the Flask application defined in pr_sync.ui.app.
+    """Entry point for the workspace sync tool.
+    Synchronizes the local git repository with remote and updates dependencies.
     """
-    # Import inside function to avoid heavy imports when the module is imported elsewhere.
-    from pr_sync.ui.app import app
-    # Run Flask development server
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+            sys.stderr.reconfigure(encoding="utf-8")
+        except AttributeError:
+            pass
+
+    print("🔄 Synchronizing local workspace...")
+    try:
+        subprocess.run(["git", "fetch", "--all", "--prune"], check=True)
+        print("✅ Fetched from origin.")
+        subprocess.run(["git", "pull", "--rebase"], check=True)
+        print("✅ Pulled remote changes.")
+        subprocess.run([sys.executable, "-m", "pip", "install", "-e", "."], check=True)
+        print("✅ Dependencies updated.")
+        print("🎉 Workspace synchronized successfully!")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error during sync: {e}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
