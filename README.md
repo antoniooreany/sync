@@ -1,6 +1,16 @@
 # Repository Automation Toolkit: Usage Guide
 
-This guide describes how to use the automation tools (`dp`, `glnt`, `pr`, and `rl`) together to manage repository health, enforce commit formatting, generate pull requests, and automate version releases.
+**Shortcuts & Hints:**
+```bash
+sync     # Synchronizes the local workspace: fetches and pulls remote changes, and installs project dependencies (Node.js/Python).
+sync ui  # Starts the syNC local web UI dashboard for easy GUI access to all automation tools.
+doc      # Generates or updates Markdown documentation for Python source code using AI. Defaults to staged files. Use `doc --all` for all files.
+cm    # Commit helper. Auto-generates Conventional Commits or allows manual commits.
+pr    # Synchronizes PRs: Generates PR titles, descriptions, and tags using AI based on diffs.
+rl    # Orchestrates version releases, changelog generation, and GitHub tagging.
+```
+
+This guide describes how to use the automation tools (`dp`, `glnt`, `cm`, `doc`, `pr`, `sync`, and `rl`) together to manage repository health, enforce commit formatting, generate pull requests, and automate version releases.
 
 ---
 
