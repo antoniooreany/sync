@@ -1,6 +1,8 @@
 import sys
 import argparse
+from typing import Optional
 from pathlib import Path
+from sync import chdir_to_git_root
 
 from version_sync.constants import (
     EXIT_CODE_SUCCESS,
@@ -80,6 +82,7 @@ def main() -> None:
         except AttributeError:
             pass  # Older Python versions may not support reconfigure
 
+    chdir_to_git_root()
     parser = argparse.ArgumentParser(description="Version Sync CLI (v)")
     subparsers = parser.add_subparsers(dest="command", required=True)
 

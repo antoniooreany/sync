@@ -6,9 +6,11 @@ from pr_sync.gh_api import check_auth, find_open_pr, create_pr, update_pr, add_l
 from pr_sync.pr_body import render_pr_body
 from pr_sync.invariants import check_no_empty_diff_action
 from pr_sync.docs_generator import infer_type_label, infer_area_labels
+from sync import chdir_to_git_root
 
 def main():
     try:
+        chdir_to_git_root()
         # Reconfigure console output encoding on Windows to support emojis
         if sys.platform == "win32":
             try:

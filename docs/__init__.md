@@ -1,90 +1,80 @@
-## Python Module Documentation: `sync`
+# Python Script: Git Root Finder
 
-### Module Description
+## File/Module Description
 
-The `sync` package is a collection of tools designed to facilitate various synchronization tasks in a Python environment. It provides functions and classes that allow developers to manage dependencies, handle asynchronous operations, and coordinate different components of a system.
+This Python script provides functions to find and change the working directory to the root of a Git repository. The script is designed to be used in environments where Git repositories are present, allowing for streamlined operations like running Git commands.
 
-### Class Reference
+## Class and Function Reference
 
-#### `DependencyResolver`
-This class is responsible for resolving dependencies between different modules and services within a system. The main method `resolve_dependencies()` takes in a list of module configurations and returns the resolved dependencies.
-
-**Parameters:**
-- `module_configs`: A list of dictionaries, where each dictionary contains configuration information for a module. Each dictionary should have keys such as `name`, `dependencies`, and `version`.
-
-**Return Type:**
-- A dictionary representing the resolved dependencies.
-
-**Exceptions Raised:**
-- `DependencyNotFoundError` if a required dependency is not found.
-- `ModuleVersionError` if the version of a required module does not match the expected version.
-
-#### `AsyncOperationCoordinator`
-This class coordinates asynchronous operations across different threads or processes. The main method `start_operations()` takes in a list of operation configurations and starts executing them concurrently.
+### `find_git_root(path=None)`
 
 **Parameters:**
-- `operation_configs`: A list of dictionaries, where each dictionary contains configuration information for an operation. Each dictionary should have keys such as `name`, `function`, and `arguments`.
+- `path` (str, optional): The path to start the search from. Defaults to the current working directory (`os.getcwd()`).
 
-**Return Type:**
+**Returns:**
+- `Path` or `None`: The root directory of the Git repository if found, otherwise `None`.
+
+**Description:**
+- This function recursively searches for the `.git` directory in the specified path and its ancestors to determine the root of the Git repository.
+- It returns the `Path` object representing the root directory, or `None` if no Git repository is found.
+
+**Example Usage:**
+```python
+from git_root_finder import find_git_root
+
+# Example usage: find the root directory of the current working directory
+root_path = find_git_root()
+if root_path:
+    print(f"Git repository root: {root_path}")
+else:
+    print("No Git repository found.")
+```
+
+### `chdir_to_git_root()`
+
+**Parameters:**
 - None
 
-**Exceptions Raised:**
-- `OperationExecutionError` if any operation fails to execute.
+**Returns:**
+- `bool`: `True` if the working directory was successfully changed to the Git repository root, `False` otherwise.
 
-### Practical Usage Examples
+**Description:**
+- This function uses the `find_git_root` function to locate the root directory of the Git repository.
+- It then changes the current working directory to the root directory using `os.chdir()`.
+- It returns `True` if the change was successful, otherwise `False`.
 
-#### Example 1: Resolving Dependencies
+**Example Usage:**
 ```python
-# Importing the DependencyResolver class from sync package
-from sync import DependencyResolver
+from git_root_finder import chdir_to_git_root
 
-# Defining module configurations
-module_configs = [
-    {
-        'name': 'database',
-        'dependencies': ['connector'],
-        'version': '3.4.2'
-    },
-    {
-        'name': 'web_service',
-        'dependencies': ['rest_api', 'logging'],
-        'version': '1.0.5'
-    }
-]
-
-# Creating an instance of DependencyResolver
-resolver = DependencyResolver()
-
-# Resolving dependencies
-resolved_dependencies = resolver.resolve_dependencies(module_configs)
-
-print(resolved_dependencies)
+# Example usage: change the working directory to the Git repository root
+if chdir_to_git_root():
+    print("Working directory changed to the Git repository root.")
+else:
+    print("Failed to change the working directory.")
 ```
 
-#### Example 2: Starting Asynchronous Operations
-```python
-# Importing the AsyncOperationCoordinator class from sync package
-from sync import AsyncOperationCoordinator
+## Practical Usage Examples
 
-# Defining operation configurations
-operation_configs = [
-    {
-        'name': 'fetch_data',
-        'function': fetch_data,
-        'arguments': {'url': 'https://api.example.com/data'}
-    },
-    {
-        'name': 'process_data',
-        'function': process_data,
-        'arguments': {'data': []}
-    }
-]
+1. **Finding the Git Root:**
+   ```python
+   from git_root_finder import find_git_root
 
-# Creating an instance of AsyncOperationCoordinator
-coordinator = AsyncOperationCoordinator()
+   root_path = find_git_root()
+   if root_path:
+       print(f"Git repository root: {root_path}")
+   else:
+       print("No Git repository found.")
+   ```
 
-# Starting operations concurrently
-coordinator.start_operations(operation_configs)
-```
+2. **Changing the Working Directory to the Git Root:**
+   ```python
+   from git_root_finder import chdir_to_git_root
 
-This documentation provides a comprehensive overview of the `sync` package, including its key classes and functions, as well as practical usage examples to help developers understand how to integrate these tools into their applications.
+   if chdir_to_git_root():
+       print("Working directory changed to the Git repository root.")
+   else:
+       print("Failed to change the working directory.")
+   ```
+
+This Python script provides a simple yet effective way to locate and change the working directory to the root of a Git repository, making it easier to perform Git operations from any directory.

@@ -2,6 +2,7 @@ import sys
 import argparse
 import subprocess
 from pathlib import Path
+from sync import chdir_to_git_root
 
 def run_git(args: list[str]) -> str:
     res = subprocess.run(["git"] + args, capture_output=True, text=True, encoding="utf-8", check=True)
@@ -36,7 +37,8 @@ def main():
         except AttributeError:
             pass
 
-    parser = argparse.ArgumentParser(description="Documentation Generator (doc)")
+    chdir_to_git_root()
+    parser = argparse.ArgumentParser(description="Documentation Generator via AI")
     parser.add_argument("--all", action="store_true", help="Generate docs for all supported source files in src/")
     parser.add_argument("--staged", action="store_true", help="Generate docs for staged files (default if no args)")
     parser.add_argument("files", nargs="*", help="Specific files to generate docs for")

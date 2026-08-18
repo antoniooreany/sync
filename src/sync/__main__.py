@@ -58,10 +58,13 @@ def run_init():
         print(f"❌ Error during initialization: {e}", file=sys.stderr)
         sys.exit(1)
 
+from sync import chdir_to_git_root
+
 def main():
     """Entry point for the workspace sync tool.
     Synchronizes the local git repository or runs the web UI.
     """
+    chdir_to_git_root()
     if sys.platform == "win32":
         try:
             sys.stdout.reconfigure(encoding="utf-8")

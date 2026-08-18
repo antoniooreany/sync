@@ -9,8 +9,10 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
+from sync import find_git_root
 # Base directory setup
-CWD = "C:/Users/anton/Projects/sync"
+_git_root = find_git_root()
+CWD = str(_git_root) if _git_root else os.getcwd()
 
 @app.route("/", methods=["GET"])
 def index():
