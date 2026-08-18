@@ -16,7 +16,9 @@ CWD = "C:/Users/anton/Projects/sync"
 def index():
     """Render the main dashboard page with dynamic git branches list."""
     import subprocess
+    import os
     branches = ["develop", "main"]
+    repo_name = os.path.basename(CWD)
     try:
         # Get list of local git branches
         res = subprocess.run(
@@ -37,7 +39,7 @@ def index():
     elif "develop" not in branches:
         branches.insert(0, "develop")
 
-    return render_template("index.html", branches=branches)
+    return render_template("index.html", branches=branches, repo_name=repo_name)
 
 @app.route("/run", methods=["POST"])
 def run_command():
