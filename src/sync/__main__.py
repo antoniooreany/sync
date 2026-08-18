@@ -34,7 +34,16 @@ def run_sync_workspace():
 
 def run_ui():
     from pr_sync.ui.app import app
+    import webbrowser
+    import threading
+    import os
+
     print("🚀 Starting syNC UI...")
+    
+    # Open browser only in the main process (not the reloader child)
+    if not os.environ.get("WERKZEUG_RUN_MAIN"):
+        threading.Timer(1.0, lambda: webbrowser.open("http://127.0.0.1:5000/")).start()
+        
     app.run(host="127.0.0.1", port=5000, debug=True)
 
 def run_init():
