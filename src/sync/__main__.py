@@ -33,9 +33,21 @@ def run_sync_workspace():
         sys.exit(1)
 
 def run_ui():
-    print("🚀 Starting syNC UI...")
     from pr_sync.ui.app import app
+    print("🚀 Starting syNC UI...")
     app.run(host="127.0.0.1", port=5000, debug=True)
+
+def run_init():
+    print("🚀 Initializing repository (Dependabot + Gitlint)...")
+    try:
+        print("\n--- Running Dependabot Initialization ---")
+        subprocess.run([sys.executable, "-m", "dependabot_sync.cli", "init"], check=True)
+        print("\n--- Running Gitlint Initialization ---")
+        subprocess.run([sys.executable, "-m", "gitlint_sync.cli", "init"], check=True)
+        print("\n✅ Repository initialization complete.")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Error during initialization: {e}", file=sys.stderr)
+        sys.exit(1)
 
 def main():
     """Entry point for the workspace sync tool.
@@ -48,10 +60,15 @@ def main():
         except AttributeError:
             pass
 
-    if len(sys.argv) > 1 and sys.argv[1] == "ui":
-        run_ui()
-    else:
-        run_sync_workspace()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "ui":
+            run_ui()
+            return
+        elif sys.argv[1] == "init":
+            run_init()
+            return
+
+    run_sync_workspace()
 
 if __name__ == "__main__":
     main()
