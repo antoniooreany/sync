@@ -2,6 +2,7 @@ import sys
 import argparse
 import subprocess
 from pathlib import Path
+from sync import chdir_to_git_root
 from pr_sync.llm_engine import generate_llm_content
 
 def run_git(args: list[str]) -> str:
@@ -53,6 +54,7 @@ def generate_suggestion(msg: str) -> str:
         return f"feat: {clean_msg.lower()}"
 
 def main():
+    chdir_to_git_root()
     if sys.platform == "win32":
         try:
             sys.stdout.reconfigure(encoding="utf-8")

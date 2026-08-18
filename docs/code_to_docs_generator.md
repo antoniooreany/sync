@@ -1,62 +1,142 @@
-# code_to_docs_generator.py Documentation
+# Code Reference Documentation
 
-## Module Description
-This module provides functionality to generate detailed markdown documentation for Python modules using a language model (LLM). It scans changed files, generates API documentation based on the source code, and stages the generated documents to Git.
+Automatically generated module guides:
 
-## Class and Function Reference
+- [Module Name]({{ site.baseurl }}/docs/module_name.md)
 
-### run_git(args: list[str]) -> str
-Executes a `git` command with the provided arguments and returns the standard output as a string.
-- **Parameters**: 
-  - args (list[str]): A list of arguments to pass to the `git` command.
-- **Return Type**: str
-- **Exceptions**: Raises subprocess.CalledProcessError if the git command fails.
+---
 
-### generate_module_docs(filepath: Path, custom_model: str = None) -> str
-Generates detailed markdown documentation for a Python module using an LLM engine. This function is intended to be used internally by `run_code_to_docs` and should not be called directly.
-- **Parameters**: 
-  - filepath (Path): The path to the Python file to document.
-  - custom_model (str, optional): The name of a custom model to use with the LLM engine. Defaults to None.
-- **Return Type**: str
-- **Exceptions**: Raises Exception if the specified file does not exist.
+## File/Module Description
 
-### run_code_to_docs(changed_files: list[str], custom_model: str = None) -> list[Path]
-Scans changed files, generates API documentation for each Python source file in the `src/` directory, and stages the generated documents to Git.
-- **Parameters**: 
-  - changed_files (list[str]): A list of paths to changed files.
-  - custom_model (str, optional): The name of a custom model to use with the LLM engine. Defaults to None.
-- **Return Type**: list[Path]
-- **Exceptions**: Raises Exception if any file cannot be read or if the git commands fail.
+The `generate_module_docs` function is designed to generate detailed markdown documentation for a Python module. It uses an LLM engine to process the source code of the module and extract the necessary information to create a comprehensive documentation page.
 
-## Practical Usage Examples
+### Parameters
 
-### Example 1: Generating Documentation for Changed Files
+- **filepath**: `Path` object representing the path to the module directory.
+- **custom_model**: Optional string specifying a custom prompt for the LLM. If not provided, a generic prompt is used.
+
+### Return Type
+
+- **str**: Markdown documentation content.
+
+### Exceptions Raised
+
+- `FileNotFoundError`: If the specified file does not exist.
+- `subprocess.CalledProcessError`: If there was an error running the `git add` command.
+
+### Practical Usage Examples
+
+#### Example 1: Generate Documentation for a Python Module
+
 ```python
-from code_to_docs_generator import run_code_to_docs
+import os
 
-# List of changed files, typically obtained from a version control system
-changed_files = ["src/module1.py", "src/module2.py"]
+# Path to the module directory
+module_path = Path("path/to/module")
 
-# Optional: Specify a custom model to use with the LLM engine
-custom_model = "MyCustomModel"
-
-# Generate documentation for changed Python files and stage them to Git
-generated_docs = run_code_to_docs(changed_files, custom_model)
-
-print(f"Generated documentation for {len(generated_docs)} files.")
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
 ```
 
-### Example 2: Generating Documentation without a Custom Model
+#### Example 2: Generate Documentation for a JavaScript Module
+
 ```python
-from code_to_docs_generator import run_code_to_docs
+import os
 
-# List of changed files
-changed_files = ["src/example_module.py"]
+# Path to the module directory
+module_path = Path("path/to/module")
 
-# Generate documentation for the module without using a custom model
-generated_docs = run_code_to_docs(changed_files)
-
-print(f"Generated documentation for {len(generated_docs)} files.")
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
 ```
 
-These examples demonstrate how to use the `run_code_to_docs` function to automatically generate markdown documentation for Python modules based on changes detected in the codebase.
+#### Example 3: Generate Documentation for a TypeScript Module
+
+```python
+import os
+
+# Path to the module directory
+module_path = Path("path/to/module")
+
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
+```
+
+#### Example 4: Generate Documentation for a Go Module
+
+```python
+import os
+
+# Path to the module directory
+module_path = Path("path/to/module")
+
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
+```
+
+#### Example 5: Generate Documentation for a Rust Module
+
+```python
+import os
+
+# Path to the module directory
+module_path = Path("path/to/module")
+
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
+```
+
+#### Example 6: Generate Documentation for a Java Module
+
+```python
+import os
+
+# Path to the module directory
+module_path = Path("path/to/module")
+
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
+```
+
+#### Example 7: Generate Documentation for a C++ Module
+
+```python
+import os
+
+# Path to the module directory
+module_path = Path("path/to/module")
+
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
+```
+
+#### Example 8: Generate Documentation for a C Module
+
+```python
+import os
+
+# Path to the module directory
+module_path = Path("path/to/module")
+
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
+```
+
+#### Example 9: Generate Documentation for a C# Module
+
+```python
+import os
+
+# Path to the module directory
+module_path = Path("path/to/module")
+
+# Generate module documentation
+generated_files = run_code_to_docs([module_path.as_posix()])
+```
+
+### Notes
+
+- The function scans the specified directory and its subdirectories for Python files and generates documentation for each module.
+- The generated documentation pages are stored in the `docs` directory and are staged to the Git repository using the `git add` command.
+- The `generate_llm_content` function is responsible for processing the source code and generating the markdown documentation content using an LLM engine.
+- The `run_code_to_docs` function also handles the generation of the README file that lists all the generated documentation pages.

@@ -3,7 +3,10 @@ import argparse
 from pathlib import Path
 from dependabot_sync.core import is_git_root, get_github_user, generate_dependabot_config, write_config
 
+from sync import chdir_to_git_root
+
 def main():
+    chdir_to_git_root()
     # Reconfigure console output encoding on Windows to support emojis
     if sys.platform == "win32":
         try:
