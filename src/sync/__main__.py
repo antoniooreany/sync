@@ -6,6 +6,12 @@ def main():
     """Entry point for the workspace sync tool.
     Synchronizes the local git repository with remote and updates dependencies.
     """
+    if len(sys.argv) > 1 and sys.argv[1] == "ui":
+        from pr_sync.ui.app import app
+        print("🚀 Starting syNC UI...")
+        app.run(host="127.0.0.1", port=5000, debug=True)
+        return
+
     if sys.platform == "win32":
         try:
             sys.stdout.reconfigure(encoding="utf-8")
