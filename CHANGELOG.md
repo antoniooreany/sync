@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.0 — 2026-09-27
+
+### Internal
+- [#10] feat(maturity): hygiene pass for v0.5.0 (by @antoniooreany)
+
 ## v0.4.2 — 2026-09-04
 
 ### Internal
