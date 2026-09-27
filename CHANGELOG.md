@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.4.2 — 2026-09-04
+
+### Internal
+- Hygiene: drop unused runtime deps, add CI (pytest + ruff), clean gitignore
+- Product cleanup: remove SboxGame UI hooks, dead Gemini/docs stubs
+- Docs: README, architecture overview, LICENSE
+
 ## v0.4.1 — 2026-08-11
 
 ### Internal

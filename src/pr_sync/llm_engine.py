@@ -5,36 +5,6 @@ import urllib.request
 import urllib.error
 from typing import Optional
 
-def _get_best_gemini_model(api_key: str) -> str:
-    """Query the API to find an available flash model."""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models?key={api_key}"
-    try:
-        req = urllib.request.Request(url, headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=15.0) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            
-            available_models = [m.get("name") for m in data.get("models", []) if "generateContent" in m.get("supportedGenerationMethods", [])]
-            
-            for target in [
-                "models/gemini-2.0-flash-lite", 
-                "models/gemini-flash-lite-latest", 
-                "models/gemma-4-26b-a4b-it",
-                "models/gemma-4-31b-it",
-                "models/gemini-3.1-flash-lite",
-                "models/gemini-3.5-flash-lite",
-                "models/gemini-2.0-flash"
-            ]:
-                if target in available_models:
-                    return target
-                    
-            for name in available_models:
-                if "lite" in name and "vision" not in name and "2.5" not in name:
-                    return name
-                    
-    except Exception as e:
-        print(f"Failed to list Gemini models: {e}")
-        
-    return "models/gemini-2.0-flash"
 
 def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Optional[str]:
     """Sends a generic prompt to the local Ollama LLM API (always enforces local models)."""
@@ -78,7 +48,7 @@ def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Opt
             print(f" ❌ Local API Error: {e}")
             try:
                 print(f"    Response body: {e.read().decode('utf-8')}")
-            except:
+            except Exception:
                 pass
             return None
         except Exception as e:
@@ -86,6 +56,7 @@ def generate_llm_content(prompt: str, custom_model: Optional[str] = None) -> Opt
             return None
             
     return None
+
 
 def generate_smart_pr_summary(diff: str, commits: list[str], custom_model: Optional[str] = None) -> Optional[str]:
     """Uses LLM API to generate a smart summary and risk analysis."""
@@ -108,6 +79,3 @@ Respond with ONLY the markdown content for these two sections:
 <your assessment of risks>
 """
     return generate_llm_content(prompt, custom_model=custom_model)
-
-
-

@@ -3,7 +3,10 @@ import argparse
 from pathlib import Path
 from gitlint_sync.core import is_git_root, write_configs
 
+from sync import chdir_to_git_root
+
 def main():
+    chdir_to_git_root()
     # Reconfigure console output encoding on Windows to support emojis
     if sys.platform == "win32":
         try:

@@ -2,9 +2,16 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
 .venv/
 venv/
+build/
+dist/
 .specify/feature.json
+
+# Local / transient junk
+report.pdf
+0.26.0
 
 # Ignore independent subprojects folders (legacy, now consolidated into src/)
 /pr-sync/
@@ -13,3 +20,4 @@ venv/
 /release-sync/
 /version-sync/
 /snc/
+/oracle-capacity-hunter-claude/
