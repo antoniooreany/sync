@@ -16,6 +16,9 @@ class TestFeatureSync(unittest.TestCase):
         feats = get_porter_features()
         self.assertIn("gitflow_sync", feats)
         self.assertIn("gitlint_sync", feats)
+        self.assertIn("doc_sync", feats)
+        self.assertNotIn("docgen_sync", feats)
+        self.assertNotIn("testgen_sync", feats)
 
     def test_copy_feature_configs_gitlint(self):
         copied = copy_feature_configs("gitlint_sync", self.test_dir)

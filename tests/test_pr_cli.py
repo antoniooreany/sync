@@ -4,9 +4,10 @@ from pr_sync.cli import main
 
 
 @patch("pr_sync.cli.sys.argv", ["pr-sync"])
+@patch("pr_sync.cli.check_auth", return_value=True)
 @patch("pr_sync.cli.get_current_branch", return_value="feature/test")
 @patch("pr_sync.cli.get_diff", return_value="")
-def test_cli_empty_diff(mock_diff, mock_branch):
+def test_cli_empty_diff(mock_diff, mock_branch, mock_auth):
     assert main() == 0
 
 

@@ -44,7 +44,7 @@ def run_ui():
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
         threading.Timer(1.0, lambda: webbrowser.open("http://127.0.0.1:5000/")).start()
         
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=False)
 
 def run_init():
     print("🚀 Initializing repository (Dependabot + Gitlint)...")

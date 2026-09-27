@@ -1,5 +1,9 @@
 # Code Reference Documentation
 
+Hand-written overview: [architecture.md](architecture.md).
+
+Other pages in this folder may be AI-generated drafts from `doc` / `pr` and can drift from the code.
+
 Automatically generated module guides:
 
 - [app](app.md)

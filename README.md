@@ -1,89 +1,108 @@
-# Repository Automation Toolkit: Usage Guide
+# syNC — Repository Automation Toolkit
 
-**Shortcuts & Hints:**
+CLI tools for Dependabot/commitlint setup, Conventional Commits, AI-assisted PRs and docs (local Ollama), gitflow, version bumps, and GitHub releases. Optional local Flask dashboard via `sync ui`.
+
+## Prerequisites
+
+- Python ≥ 3.9
+- [`git`](https://git-scm.com/)
+- [`gh`](https://cli.github.com/) (GitHub CLI), authenticated (`gh auth login`)
+- [Ollama](https://ollama.com/) for `pr` / `doc` / `cm` AI features (default model: `qwen2.5-coder:7b`)
+
+## Install
 
 ```bash
-sync init # Configures Dependabot, Commitlint, hooks, and CI workflows in one step.
-sync ui   # Starts the syNC local web UI dashboard for easy GUI access to all automation tools.
-sync      # Synchronizes the local workspace: fetches and pulls remote changes, and installs project dependencies (Node.js/Python).
-doc       # Generates or updates Markdown documentation for Python source code using AI. Defaults to staged files. Use `doc --all` for all files.
-cm        # Commit helper. Auto-generates Conventional Commits or allows manual commits.
-pr        # Synchronizes PRs: Generates PR titles, descriptions, and tags using AI based on diffs.
-rl        # Orchestrates version releases, changelog generation, and GitHub tagging.
+pip install -e ".[dev]"   # package + pytest/ruff
+# or runtime only:
+pip install -e .
 ```
 
-This guide describes how to use the automation tools (`dp`, `glnt`, `cm`, `doc`, `pr`, `sync`, and `rl`) together to manage repository health, enforce commit formatting, generate pull requests, and automate version releases.
+## Shortcuts
+
+```bash
+sync init   # Dependabot + Commitlint hooks/CI in one step
+sync ui     # Local web dashboard (http://127.0.0.1:5000)
+sync        # Fetch/pull + install project deps (npm/pip)
+dp          # Dependabot config (dp init)
+glnt        # Commit lint setup (glnt init)
+cm          # Conventional Commit helper (LLM or manual)
+doc         # AI Markdown docs (staged files; doc --all for src/)
+pr          # Create/update PR title, body, labels from diffs
+rl          # Version bump, CHANGELOG, tag, GitHub Release
+gf          # Gitflow check / start / finish
+fs          # Feature porter (copy toolkit configs into a repo)
+vs          # Version detect / bump / set / sync
+```
+
+Architecture overview: [docs/architecture.md](docs/architecture.md). Auto-generated module pages under `docs/` are drafts — prefer this README and the architecture doc.
 
 ---
 
+## 1. Initial setup (one-time)
 
+In the target git repository:
 
-## 1. Initial Repository Setup (One-time)
-
-To configure Dependabot, Commitlint, local commit hooks, and CI workflows in a single step, run this in the root of the Git repository:
-
-- **Configure Dependabot**:
-  ```bash
-  dp init
-  ```
-  - *What it does*: Generates a low-noise `.github/dependabot.yml` (daily checks, max 3 PRs).
-- **Configure Commit Linting**:
-  ```bash
-  glnt init
-  ```
-  - *What it does*: Generates `.gitlint` rules, sets up the local `.git/hooks/commit-msg` python validator, and adds the `.github/workflows/commit-lint.yml` GitHub Actions pipeline.
+```bash
+sync init
+# or separately:
+dp init    # .github/dependabot.yml
+glnt init  # .gitlint, commit-msg hook, commit-lint workflow
+```
 
 ---
 
+## 2. Daily development flow
 
-
-## 2. Daily Development Flow
-
-With the tools initialized, follow this loop:
-
-### Step A: Code & Commit
-
-Make changes and commit them. The commit-msg hook runs automatically:
+### Commit
 
 ```bash
 git add .
 git commit -m "feat(ui): add new interactive dashboard"
+# or: cm
 ```
 
-- If the commit message is invalid (e.g. `fixed bug`), the commit is rejected with a clear explanation of Conventional Commits requirements.
+Invalid messages (e.g. `fixed bug`) are rejected by the commit-msg hook with Conventional Commits guidance.
 
-
-
-### Step B: Create / Sync Pull Request
-
-Once you push your branch and open a PR, run:
+### Pull request
 
 ```bash
 pr
+pr -m 1.5b   # optional Ollama model override
 ```
 
-- **With custom model**: `pr -m 1.5b`
-- **What it does**: Analyzes diffs/commits, generates PR Title, detailed Markdown Body (with LLM Summary & Risk Analysis), and applies tags (`type:`*, `area:*`).
+Analyzes diffs/commits, generates title and Markdown body (summary + risks), applies labels (`type:*`, `area:*`).
 
 ---
 
-
-
-## 3. Releasing a New Version
-
-When features in `develop` are ready, orchestrate the entire release (version bumping + changelog compilation + tagging + GitHub release) in a single atomic action:
+## 3. Releasing
 
 ```bash
-rl 0.3.0
+rl 0.3.0 --dry-run   # preview
+rl 0.3.0             # bump, CHANGELOG, commit, tag, GitHub Release
+# or: rl patch | rl minor | rl major
 ```
 
-- **Dry-run first**: `rl 0.3.0 --dry-run` (prints what files would change and prints compiled release notes without committing or tagging).
-- **What it does**:
-  1. Bumps/sets version to `0.3.0` across all repository configs (`pyproject.toml`, etc.) and code source files.
-  2. Compiles release notes from merged PRs since the last release.
-  3. Updates `CHANGELOG.md`.
-  4. Commits `CHANGELOG.md` and version changes with `chore(release): release v0.3.0`.
-  5. Pushes the release commit to GitHub.
-  6. Tags the release `v0.3.0` and pushes the tag.
-  7. Creates the official GitHub Release.
+Steps: sync version across configs → notes from merged PRs → `CHANGELOG.md` → commit → push → tag → GitHub Release.
 
+---
+
+## 4. Other tools
+
+| Command | Role |
+|---------|------|
+| `gf check` | Gitflow branch naming compliance |
+| `gf start feature <name>` | Create and switch to a gitflow branch |
+| `gf finish` | Merge/finish current gitflow branch |
+| `vs detect` / `vs bump` / `vs set` | Version helpers |
+| `doc` / `doc --all` | LLM docs for staged or all `src/` files |
+| `fs` | Interactive porter for toolkit features into another repo |
+| `sync ui` | Dashboard for the same CLIs (allowlisted modules only) |
+
+## Development
+
+```bash
+pytest
+ruff check src tests
+```
+
+CI runs pytest (Python 3.9 / 3.12) and ruff on push and pull requests.
