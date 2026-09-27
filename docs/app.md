@@ -1,76 +1,121 @@
-# Sync Module Documentation
+# SboxGame Release Automation Flask Application
 
-The `sync` module is designed to manage various tasks related to syncing and maintaining monorepo projects. It provides two main routes: `/run` and `/compress`.
+## Introduction
+This Flask application is designed to facilitate the release automation process for a SboxGame project. It provides a user-friendly interface to manage local Git branches and execute various scripts for releasing different types of builds. The application is designed to be easily integrated into a development workflow and can be run locally for testing and development purposes.
 
-## Module Description
+## File/Module Description
 
-This module includes functions for executing specific target scripts with parameters, as well as a feature to compress SboxGame Windows builds using PowerShell.
+#### `app.py`
+- **Purpose**: Main application entry point. It sets up the Flask web server and routes for different functionalities.
+- **Design**:
+  - **Flask**: The main web server to handle HTTP requests and responses.
+  - **find_git_root**: A function to locate the root directory of the Git repository.
+  - **index**: Handles the main dashboard page, displaying dynamic git branches list.
+  - **run_command**: Executes the selected monorepo script with specified parameters.
+  - **compress**: Compresses the build artifacts using PowerShell.
+  - **download_release**: Downloads the generated release zip file.
 
-### Class and Function Reference
+#### `sync.py`
+- **Purpose**: Contains utilities for syncing and deploying different types of builds.
+- **Design**:
+  - **find_git_root**: A function to locate the root directory of the Git repository.
+  - **main**: The main function to execute the selected monorepo script.
 
-#### `sync.run_command`
+## Class and Function Reference
 
-**Description:** Executes the specified script with given arguments in the local monorepo directory.
+#### `app.py`
+- **`index()`**
+  - **Purpose**: Renders the main dashboard page with dynamic git branches list.
+  - **Parameters**:
+    - `branches`: List of available branches.
+    - `repo_name`: Name of the repository.
+  - **Return Type**: HTML string.
+  - **Raises**: `Exception` if an error occurs during the execution of `git branch`.
 
-**Parameters:**
-- **script (str):** The name of the target script. Supported scripts include:
-  - `pr`: `pr_sync.cli`
-  - `rl`: `release_sync.cli`
-  - `dp`: `dependabot_sync.cli`
-  - `glnt`: `gitlint_sync.cli`
-  - `cm`: `gitlint_sync.commit_generator`
-  - `gf`: `gitflow_sync.cli`
-  - `fs`: `feature_sync.cli`
-  - `vs`: `version_sync.cli`
+- **`run_command()`**
+  - **Purpose**: Executes the selected monorepo script with specified parameters.
+  - **Parameters**:
+    - `data`: JSON payload containing the script and arguments.
+  - **Return Type**: JSON response containing the return code, stdout, and stderr.
+  - **Raises**: `Exception` if an error occurs during the execution of the script.
 
-- **args (list):** A list of arguments to pass to the target script. The order and number of arguments are not specified, but the provided parameters should be valid for the respective script.
+- **`compress()`**
+  - **Purpose**: Compresses the build artifacts using PowerShell.
+  - **Parameters**:
+    - `None`
+  - **Return Type**: JSON response containing the return code, stdout, and stderr.
+  - **Raises**: `Exception` if an error occurs during the compression process.
 
-**Return Type:**
-- **dict:** A dictionary containing the return code (`returncode`), standard output (`stdout`), and standard error (`stderr`) from the executed script.
+- **`download_release()`**
+  - **Purpose**: Downloads the generated release zip file.
+  - **Parameters**: `None`
+  - **Return Type**: Redirects to the release zip file for download.
+  - **Raises**: `Exception` if the release zip file is not found.
 
-**Exceptions Raised:**
-- **ValueError:** If an invalid script name is provided.
-- **subprocess.CalledProcessError:** If the command execution fails with a non-zero exit status.
-
-#### `sync.compress`
-
-**Description:** Runs PowerShell to compress the contents of the specified SboxGame Windows build directory into a ZIP file.
-
-**Parameters:**
-- **None**
-
-**Return Type:**
-- **dict:** A dictionary containing the return code (`returncode`), standard output (`stdout`), and standard error (`stderr`) from the PowerShell command execution.
-
-**Exceptions Raised:**
-- **FileNotFoundError:** If the specified build directory does not exist.
-- **subprocess.CalledProcessError:** If the PowerShell command execution fails with a non-zero exit status.
+#### `sync.py`
+- **`main()`**
+  - **Purpose**: Executes the selected monorepo script.
+  - **Parameters**:
+    - `script`: The name of the script to execute.
+    - `args`: The arguments to pass to the script.
+  - **Return Type**: None.
+  - **Raises**: `Exception` if the script execution fails.
 
 ## Practical Usage Examples
 
-#### Running a Target Script
+### Running a Script
 
-To run a specific target script, send a POST request to `/run` with the appropriate JSON payload. For example:
+1. **Navigate to the Project Directory**:
+   ```sh
+   cd /path/to/your/project
+   ```
 
-```json
-{
-    "script": "pr",
-    "args": ["list", "of", "arguments"]
-}
-```
+2. **Run the Main Application**:
+   ```sh
+   python app.py
+   ```
 
-This will execute the `pr_sync.cli` script with the provided arguments and return the output in JSON format.
+3. **Open the Web Browser**:
+   Open a web browser and navigate to `http://127.0.0.1:5000/`.
 
-#### Compressing a Build Directory
+4. **Select a Script and Arguments**:
+   - Go to the "Run" route.
+   - Select a script from the dropdown menu.
+   - Enter any required arguments in the input fields.
 
-To compress the SboxGame Windows build directory, send a POST request to `/compress`. For example:
+5. **View the Output**:
+   - The application will execute the selected script and return the output in JSON format.
 
-```json
-{
-    // No parameters needed for this endpoint
-}
-```
+### Compressing a Build
 
-This will run the PowerShell command to zip up the contents of the `Builds/Windows` directory into `Release/SboxGame_v1.1.1.zip`.
+1. **Navigate to the Build Directory**:
+   ```sh
+   cd /path/to/your/project/Builds/Windows
+   ```
 
-These examples demonstrate how to interact with the `sync` module using Python, ensuring that tasks related to project synchronization and management are efficiently managed.
+2. **Run the Compress Route**:
+   ```sh
+   curl -X POST http://127.0.0.1:5000/compress
+   ```
+
+3. **Download the Result**:
+   - The application will execute the compression process and return the zip file URL.
+   - Click the link to download the generated release zip file.
+
+### Downloading a Release
+
+1. **Navigate to the Release Directory**:
+   ```sh
+   cd /path/to/your/project/Release
+   ```
+
+2. **Run the Download Route**:
+   ```sh
+   curl -X GET http://127.0.0.1:5000/download
+   ```
+
+3. **Download the Result**:
+   - The application will return the zip file URL.
+   - Click the link to download the generated release zip file.
+
+By following these usage examples, you can easily manage the release automation process for your SboxGame project using this Flask application.

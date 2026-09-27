@@ -12,7 +12,10 @@ from gitflow_sync.core import (
     start_branch
 )
 
+from sync import chdir_to_git_root
+
 def main():
+    chdir_to_git_root()
     # Reconfigure console output encoding on Windows to support emojis
     if sys.platform == "win32":
         try:

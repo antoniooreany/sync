@@ -9,14 +9,18 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
+from sync import find_git_root
 # Base directory setup
-CWD = "C:/Users/anton/Projects/sync"
+_git_root = find_git_root()
+CWD = str(_git_root) if _git_root else os.getcwd()
 
 @app.route("/", methods=["GET"])
 def index():
     """Render the main dashboard page with dynamic git branches list."""
     import subprocess
+    import os
     branches = ["develop", "main"]
+    repo_name = os.path.basename(CWD)
     try:
         # Get list of local git branches
         res = subprocess.run(
@@ -37,7 +41,7 @@ def index():
     elif "develop" not in branches:
         branches.insert(0, "develop")
 
-    return render_template("index.html", branches=branches)
+    return render_template("index.html", branches=branches, repo_name=repo_name)
 
 @app.route("/run", methods=["POST"])
 def run_command():

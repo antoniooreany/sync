@@ -35,10 +35,13 @@ def run_code_to_docs(changed_files: list[str], custom_model: str = None) -> list
 
     generated_files = []
 
-    # Process python source files in src/
+    # Supported extensions
+    supported_extensions = {".py", ".js", ".ts", ".go", ".rs", ".java", ".cpp", ".c", ".h", ".hpp", ".cs"}
+
+    # Process source files
     for filepath_str in changed_files:
         path = Path(filepath_str)
-        if path.suffix == ".py" and filepath_str.startswith("src/"):
+        if path.suffix in supported_extensions:
             print(f"📄 Generating documentation for {filepath_str}...")
             
             try:
@@ -46,14 +49,21 @@ def run_code_to_docs(changed_files: list[str], custom_model: str = None) -> list
             except Exception:
                 continue
 
-            prompt = f"""You are a professional technical writer. Generate a clean, detailed markdown documentation page for the following Python module.
+            lang_map = {
+                ".py": "Python", ".js": "JavaScript", ".ts": "TypeScript",
+                ".go": "Go", ".rs": "Rust", ".java": "Java", ".cpp": "C++",
+                ".c": "C", ".cs": "C#"
+            }
+            language = lang_map.get(path.suffix, "source code")
+
+            prompt = f"""You are a professional technical writer. Generate a clean, detailed markdown documentation page for the following {language} file.
 Include:
-1. Module Description (purpose and design).
+1. File/Module Description (purpose and design).
 2. Class and Function reference (parameters, return types, exceptions raised).
 3. Practical Usage Examples.
 
-Module Source Code:
-```python
+Source Code:
+```{language.lower()}
 {content}
 ```
 

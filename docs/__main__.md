@@ -1,47 +1,59 @@
-### Module: `pr_sync.ui.main`
+# PrSync: A Python Workspace Synchronization Tool
 
-#### Purpose and Design
+PrSync is a comprehensive Python tool designed to synchronize local git repositories and manage Python project dependencies. It includes a web UI for real-time updates and integrates with Dependabot and Gitlint for continuous integration and code quality management.
 
-The `pr_sync.ui.main` module serves as the entry point for the Flask application used in the `pr_sync.ui` package. This module is responsible for initializing the Flask environment, creating an instance of the Flask app, and starting the development server.
+## File/Module Description
 
-#### Class and Function Reference
+### `run_sync_workspace()`
+- **Purpose**: Synchronizes the local git repository from origin and updates dependencies based on project type.
+- **Parameters**: None.
+- **Return Type**: `None`.
+- **Exceptions Raised**: `subprocess.CalledProcessError`
 
-| Class/Function Name | Parameters | Return Type | Exceptions Raised |
-|---------------------|------------|-------------|------------------|
-| `main()`          | None        | None         | `KeyError`       |
+### `run_ui()`
+- **Purpose**: Starts the PrSync web UI on `http://127.0.0.1:5000`.
+- **Parameters**: None.
+- **Return Type**: `None`.
+- **Exceptions Raised**: `subprocess.CalledProcessError`
 
-##### main() Function
+### `run_init()`
+- **Purpose**: Initializes the repository by running Dependabot and Gitlint for continuous integration and code quality management.
+- **Parameters**: None.
+- **Return Type**: `None`.
+- **Exceptions Raised**: `subprocess.CalledProcessError`
 
-The `main()` function is the entry point for the module. It performs the following tasks:
+### `main()`
+- **Purpose**: The entry point for the workspace sync tool.
+- **Parameters**: None.
+- **Return Type**: `None`.
+- **Exceptions Raised**: `subprocess.CalledProcessError`
 
-1. **Importing Flask**: Inside the function, it imports the Flask class from `pr_sync.ui.app`.
-2. **Creating an Instance of Flask App**: An instance of the Flask app is created and assigned to the variable `app`.
-3. **Running the Development Server**: The Flask application is run using the `run()` method with default parameters (`host="127.0.0.1"`, `port=5000`, and `debug=True`).
+## Practical Usage Examples
 
-#### Practical Usage Examples
-
-To use the `pr_sync.ui.main` module, you need to ensure that the Flask application is correctly set up in the `pr_sync.ui.app` module. Here's a basic example of how to do this:
-
-```python
-# pr_sync/ui/app.py
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return "Hello, World!"
-
-if __name__ == '__main__':
-    main()
-```
-
-Then, you can run the `pr_sync.ui.main` module using the following command:
-
+#### Synchronize the Local Git Repository
+To synchronize the local git repository, run the following command:
 ```sh
-python pr_sync/ui/main.py
+python pr_sync/main.py
 ```
 
-This will start a development server on `http://127.0.0.1:5000/`, displaying "Hello, World!" when you navigate to that URL in your web browser.
+#### Start the PrSync Web UI
+To start the web UI, run the following command:
+```sh
+python pr_sync/main.py ui
+```
 
-By following these steps and using the provided class and function references, you can effectively utilize the `pr_sync.ui.main` module to start a Flask application for managing synchronization tasks in your Python project.
+#### Initialize the Repository
+To initialize the repository, run the following command:
+```sh
+python pr_sync/main.py init
+```
+
+### Additional Notes
+
+- **Dependency Management**: PrSync supports Python projects using `package.json` for Node.js projects, `pyproject.toml` for Python projects, and `requirements.txt` for Python projects.
+- **Continuous Integration**: The tool integrates with Dependabot and Gitlint to ensure that your project dependencies are up-to-date.
+- **Real-Time Updates**: The web UI provides real-time updates on changes and dependency updates.
+
+### Contributing
+
+Contributions are welcome! Please open an issue or a pull request to contribute to the tool.

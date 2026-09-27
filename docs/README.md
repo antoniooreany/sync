@@ -13,5 +13,6 @@ Automatically generated module guides:
 - [feature_porter_spec](feature_porter_spec.md)
 - [gh_api](gh_api.md)
 - [pr_body](pr_body.md)
+- [test_sync_cli](test_sync_cli.md)
 - [__init__](__init__.md)
 - [__main__](__main__.md)
