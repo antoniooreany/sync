@@ -1,22 +1,29 @@
 [project]
 name = "sync"
-version = "0.4.2"
-description = "Monorepo for developer automation: pr, rl, dp, glnt, cm"
+version = "0.5.0"
+description = "Monorepo for developer automation: sync, pr, rl, dp, glnt, cm, doc, gf, fs, vs"
 authors = [
     {name = "antoniooreany"}
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "requests",
-    "google-genai"
+    "flask"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
 ]
 
 [project.scripts]
 pr   = "pr_sync.cli:main"
+sync = "sync.__main__:main"
 rl   = "release_sync.cli:main"
 dp   = "dependabot_sync.cli:main"
 glnt = "gitlint_sync.cli:main"
 cm   = "gitlint_sync.commit_generator:main"
+doc  = "doc_sync.cli:main"
 gf   = "gitflow_sync.cli:main"
 fs   = "feature_sync.cli:main"
 vs   = "version_sync.cli:main"
@@ -25,10 +32,16 @@ vs   = "version_sync.cli:main"
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
-
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py39"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# Gate on clear bugs; broaden over time without a mass autofix in this pass.
+select = ["E9", "F63", "F7", "F82"]

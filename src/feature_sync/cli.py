@@ -3,7 +3,10 @@ from pathlib import Path
 from feature_sync.constants import EXIT_CODE_SUCCESS, EXIT_CODE_EXPECTED_ERROR
 from feature_sync.core import get_porter_features, copy_feature_configs
 
+from sync import chdir_to_git_root
+
 def main():
+    chdir_to_git_root()
     # Reconfigure console output encoding on Windows to support emojis
     if sys.platform == "win32":
         try:
